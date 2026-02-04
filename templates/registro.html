@@ -1,183 +1,155 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends 'layout.html' %}
+{% block titulo %}PAIT{% endblock %}
+{% block contenido %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión | Administración</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Montserrat -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
-    <style>
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(to right, #e2e2e2, #c9d6ff);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background-color: #c9d6ff;
+        background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main-container {
+        background-color: #fff;
+        border-radius: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        position: relative;
+        overflow: hidden;
+        width: 768px;
+        max-width: 100%;
+        min-height: 480px;
+        display: flex;
+    }
+
+    .form-side {
+        width: 50%;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+    }
+
+    .image-side {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 150px 0 0 100px;
+        z-index: 10;
+    }
+
+    .image-overlay {
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('file.svg');
+        background-size: cover;
+        background-position: center;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-align: center;
+        padding: 0 30px;
+    }
+
+    .container-input input {
+        background-color: #eee;
+        border: none;
+        margin: 8px 0;
+        padding: 10px 15px;
+        font-size: 13px;
+        border-radius: 8px;
+        width: 100%;
+        outline: none;
+    }
+
+    .btn-login {
+        background-color: #8fb7ce;
+        color: #fff;
+        font-size: 12px;
+        padding: 10px 45px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-top: 10px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .btn-login:hover {
+        background-color: #5c6bc0;
+        transform: scale(1.05);
+    }
+
+    /* Responsividad para móviles */
+    @media (max-width: 768px) {
+        .image-side {
+            display: none;
+            /* Ocultamos la imagen en móviles para dar espacio al login */
         }
 
-        .login-card {
-            background: white;
-            border-radius: 30px;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        .form-side {
             width: 100%;
-            max-width: 900px;
-            min-height: 550px;
         }
-
-        .image-section {
-            background-image: url('https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/building-2.svg');
-            /* Fallback icon */
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-
-        /* Overlay para que el texto resalte sobre la imagen si es necesario */
-        .image-overlay {
-            background: rgba(92, 107, 192, 0.4);
-            height: 100%;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            color: white;
-            text-align: center;
-        }
-
-        .form-input {
-            background-color: #eee;
-            border: none;
-            padding: 12px 15px;
-            border-radius: 10px;
-            width: 100%;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-            background-color: #e5e7eb;
-            box-shadow: 0 0 0 2px #8fb7ce;
-        }
-
-        .btn-custom {
-            background-color: #5c6bc0;
-            color: white;
-            font-weight: 600;
-            padding: 12px 45px;
-            border-radius: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: transform 0.2s;
-        }
-
-        .btn-custom:hover {
-            background-color: #4a59a7;
-            transform: scale(1.02);
-            color: white;
-        }
-
-        /* Reemplazo de la imagen por la que subiste (Simulación con placeholder si la ruta local falla) */
-        .building-bg {
-            /* Aquí deberás poner la ruta de tu imagen de administración */
-            background-image: url('WhatsApp Image 2026-01-28 at 3.06.00 PM.jpeg');
-            background-size: cover;
-            background-position: center;
-        }
-    </style>
+    }
+</style>
 </head>
 
-<body>
-
-    <div class="login-card flex flex-col md:flex-row">
-
-        <!-- Sección del Formulario -->
-        <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Iniciar Sesión</h1>
-                <p class="text-gray-500 text-sm">Ingresa tus credenciales para acceder al sistema.</p>
-            </div>
-
-            <form action="#" method="POST" class="space-y-4">
-                <div class="form-group">
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Correo Electrónico</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                            <i class="fa-solid fa-envelope"></i>
-                        </span>
-                        <input type="email" class="form-input pl-10" placeholder="ejemplo@correo.com" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Contraseña</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                            <i class="fa-solid fa-lock"></i>
-                        </span>
-                        <input type="password" class="form-input pl-10" placeholder="••••••••" required>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between pt-2">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="remember"
-                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                        <label for="remember" class="ml-2 block text-xs text-gray-600">Recordarme</label>
-                    </div>
-                    <a href="#" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">¿Olvidaste tu
-                        contraseña?</a>
-                </div>
-
-                <button type="submit" class="btn-custom w-full mt-6 shadow-lg">
-                    Entrar al Sistema
-                </button>
-            </form>
-
-            <div class="mt-8 text-center md:hidden">
-                <p class="text-sm text-gray-500">
-                    Administración General del Campus
-                </p>
-            </div>
+<div class="main-container shadow">
+    <div class="form-side">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} w-100 py-2 text-xs mb-3" role="alert">
+            {{ message }}
         </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-        <!-- Sección de Imagen (Derecha) -->
-        <div class="hidden md:flex md:w-1/2 building-bg relative overflow-hidden">
-            <div class="image-overlay bg-indigo-900/40 backdrop-blur-[2px]">
-                <div class="bg-white/10 p-6 rounded-2xl border border-white/20 backdrop-blur-md">
-                    <h2 class="text-4xl font-bold mb-4 tracking-tight">Bienvenido de vuelta</h2>
-                    <p class="text-lg font-light opacity-90">
-                        Portal de Gestión Administrativa
-                    </p>
-                    <div class="mt-8 border-t border-white/30 pt-4">
-                        <span class="text-xs uppercase tracking-widest font-semibold">Módulo de Control</span>
-                    </div>
-                </div>
+        <form action="{{ url_for('login') }}" method="POST" class="w-100 text-center">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <h1 class="fw-bold text-2xl mb-3">Iniciar Sesión</h1>
+
+            <div class="container-input">
+                <input type="text" name="codigo" placeholder="Código" required />
+                <input type="password" name="password" placeholder="NIP" required />
+                <input type="text" name="celular" placeholder="Número de Celular" required />
+                <input type="email" name="correo" placeholder="Correo Electrónico" required />
             </div>
 
-            <!-- Elemento decorativo tipo curva (basado en tu imagen previa) -->
-            <div class="absolute top-0 left-0 h-full w-12 bg-white hidden md:block"
-                style="clip-path: ellipse(50% 50% at 0% 50%); transform: translateX(-1px);"></div>
-        </div>
+            <a href="#" class="text-xs text-gray-600 no-underline block my-3 hover:text-cyan-600">
+                ¿Olvidaste tu NIP?
+            </a>
 
+            <button type="submit" class="btn-login shadow-sm">Entrar</button>
+        </form>
     </div>
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <div class="image-side d-none d-md-block">
+        <div class="image-overlay">
+            <h1 class="fw-bold text-3xl mb-3">¡Bienvenido!</h1>
+            <p class="text-sm leading-relaxed">Accede para continuar con tus actividades académicas.</p>
+        </div>
+    </div>
+</div>
 
-</html>
+{% endblock %}
