@@ -5,11 +5,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 paitApp = Flask(__name__)
 db      = MySQL(paitApp)
-signinManager = LoginManager(paitApp)
 
 @paitApp.route('/registro', methods=['GET', 'POST'])
 def registro():
     return render_template('registro.html')
+
+@paitApp.route('/admin', methods=['GET', 'POST'])
+def admin():
+    return render_template('admin.html')
 
 if __name__ == '__main__':
     paitApp.config.from_object(config['development'])
