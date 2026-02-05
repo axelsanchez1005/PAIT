@@ -2,13 +2,31 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_mysqldb import MySQL
 from flask_wtf.csrf import CSRFProtect
 from config import config
+from flask_mail import Mail, Message
 
 # Modelos
 from models.ModelUser import ModelUser
 
 paitApp = Flask(__name__)
+# Configuración Flask,para decirle quien es el proveedor de correos
+paitApp.config['MAIL_SERVER'] = 'smtp.gmail.com'
+paitApp.config['MAIL_PORT'] = 587
+paitApp.config['MAIL_USE_TLS'] = True
+paitApp.config['MAIL_USERNAME'] = 'proyectospaitoficial@gmail.com' #bspz lvwj cltp uces
+paitApp.config['MAIL_PASSWORD'] = 'yqyoovwtnxbapocf' # Clave especial de Google
+
+mail = Mail(paitApp) # Inicializamos el motor
+
+
+
 csrf = CSRFProtect(paitApp) # Protección CSRF Global
 db = MySQL(paitApp)
+
+
+
+
+
+
 
 @paitApp.route('/')
 def index():
@@ -57,6 +75,35 @@ def dashboard_alumno():
 @paitApp.route('/dashboard_mentor')
 def dashboard_mentor():
     return render_template('dashboardMe.html')
+
+# Ruta para la página de recuperación de contraseña
+@paitApp.route('/enviar_recuperacion', methods=['POST', 'GET'])
+def enviar_recuperacion():
+    # 1. Atrapamos el dato del formulario
+    correo_usuario = request.form['email_usuario'] # El name que pusiste en el input
+    
+    # 2. Creamos el objeto del mensaje
+    # subject = Asunto, sender = Quien envía, recipients = Quien recibe (en lista [])
+    msg = Message(subject="Recuperar Contraseña",
+                  sender=paitApp.config['MAIL_USERNAME'],
+                  recipients=[correo_usuario])
+    
+    # 3. Escribimos el cuerpo del mensaje
+    msg.body = "Hola! Para cambiar tu clave entra a este link: (Aquí irá tu link)"
+    
+    # 4. El acto de magia: enviar
+    try:
+        mail.send(msg)
+        return "¡Correo enviado con éxito!"
+    except Exception as e:
+        return f"Error al enviar: {str(e)}"
+    
+# Ruta para abrir el formulario de recuperación de contraseña
+@paitApp.route('/Recuperar')
+def recuperar():
+    return render_template('recuperar.html')
+
+
 
 if __name__ == '__main__':
     paitApp.config.from_object(config['development'])
