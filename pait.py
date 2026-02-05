@@ -35,7 +35,7 @@ def index():
 def registro():
     return render_template('registro.html')
 
-@paitApp.route('/login', methods=['POST'])
+@paitApp.route('/login', methods=['POST', 'GET'])
 def login():
     codigo = request.form.get('codigo')
     password = request.form.get('password')
