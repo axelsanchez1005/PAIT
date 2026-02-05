@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 04-02-2026 a las 22:00:26
--- Versión del servidor: 9.2.0
+-- Tiempo de generación: 05-02-2026 a las 02:41:50
+-- Versión del servidor: 8.0.44
 -- Versión de PHP: 7.4.9
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -96,7 +96,7 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `codigo`, `nombre`, `password`, `rol`, `correo`, `celular`, `carrera`, `grado`, `grupo`, `turno`, `ingreso`, `invitados`) VALUES
-(1, 222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'polimatute', 'U', NULL, '3321790000', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05', 0),
+(1, 222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'scrypt:32768:8:1$ARbWz1oHfOmMSGhO$6965bb423954b35628f8b5206963c02c4efa5c3d682fd12d9b937d75fe3ea7494223ccf4a07608a207c56b6c7b4ef41b883ea0c297e2a45028fed00f3ccdee16', 'U', 'julian.mayorga0959@alumnos.udg.mx', '3321790000', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05', 0),
 (2, 8903727, 'GONZALES PEÑANIETO JOSE PEPE', 'polomatute', 'M', 'jose.gonzales1044@academicos.udg.mx', '1321780000', NULL, NULL, NULL, NULL, NULL, 0);
 
 --
