@@ -1,0 +1,140 @@
+:root {
+            --bg-gradient: linear-gradient(135deg, #e0e6ed 0%, #d1d9e6 100%);
+            --btn-color: #93b7cc;
+            --btn-hover: #7fa8c0;
+            --dark-gray: #8e8e8e;
+            --input-bg: #eeeeee;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+        }
+
+        .reset-card {
+            background-color: white;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 95%;
+            min-height: 500px;
+            display: flex;
+        }
+
+        /* Lado Izquierdo: Formulario */
+        .form-section {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-section h2 {
+            font-weight: 800;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #000;
+        }
+
+        .form-section p.instruction {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            background-color: var(--input-bg);
+            border: none;
+            border-radius: 10px;
+            padding: 14px 20px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus {
+            background-color: #e5e5e5;
+            box-shadow: none;
+        }
+
+        .btn-reset {
+            background-color: var(--btn-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 35px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-reset:hover {
+            background-color: var(--btn-hover);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .back-link {
+            display: block;
+            margin-bottom: 15px;
+            color: #444;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Lado Derecho: Panel Curvo */
+        .side-panel {
+            flex: 1;
+            background-color: var(--dark-gray);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            /* La curva característica */
+            border-top-left-radius: 200px;
+            border-bottom-left-radius: 200px;
+        }
+
+        .side-panel h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .side-panel p {
+            font-size: 1.1rem;
+            line-height: 1.4;
+            max-width: 280px;
+            opacity: 0.9;
+        }
+        a{
+            text-decoration: none;
+            
+        }
+        /* Responsividad */
+        @media (max-width: 768px) {
+            .side-panel {
+                display: none;
+            }
+            .form-section {
+                padding: 40px 30px;
+            }
+            .reset-card {
+                border-radius: 25px;
+            }
+        }
