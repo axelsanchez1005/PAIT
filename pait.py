@@ -3,9 +3,13 @@ from flask_mysqldb import MySQL
 from flask_wtf.csrf import CSRFProtect
 from config import config
 from flask_mail import Mail, Message
+from werkzeug.security import generate_password_hash
+from itsdangerous import URLSafeTimedSerializer
 
 # Modelos
 from models.ModelUser import ModelUser
+
+
 
 paitApp = Flask(__name__)
 # Configuración Flask,para decirle quien es el proveedor de correos
@@ -17,19 +21,18 @@ paitApp.config['MAIL_PASSWORD'] = 'yqyoovwtnxbapocf' # Clave especial de Google
 
 mail = Mail(paitApp) # Inicializamos el motor
 
-
-
+paitApp.config['SECRET_KEY'] = 'Cl4v3Sup3rm3g4S3gur4PAIT2026!'
+generador = URLSafeTimedSerializer(paitApp.config['SECRET_KEY'])
 csrf = CSRFProtect(paitApp) # Protección CSRF Global
 db = MySQL(paitApp)
 
 
-
-
-
-
-
 @paitApp.route('/')
 def index():
+    return render_template('registro.html')
+# Ruta para la página de registro/login
+@paitApp.route('/registro')
+def registro():
     return render_template('registro.html')
 
 @paitApp.route('/login', methods=['POST'])
@@ -77,19 +80,21 @@ def dashboard_mentor():
     return render_template('dashboardMe.html')
 
 # Ruta para la página de recuperación de contraseña
-@paitApp.route('/enviar_recuperacion', methods=['POST', 'GET'])
+@paitApp.route('/enviar_recuperacion', methods=['GET', 'POST'])
 def enviar_recuperacion():
     # 1. Atrapamos el dato del formulario
-    correo_usuario = request.form['email_usuario'] # El name que pusiste en el input
-    
-    # 2. Creamos el objeto del mensaje
+    correo_usuario = request.form['email_usuario']
+
+    token = generador.dumps(correo_usuario, salt='recuperar-password')
+
     # subject = Asunto, sender = Quien envía, recipients = Quien recibe (en lista [])
     msg = Message(subject="Recuperar Contraseña",
                   sender=paitApp.config['MAIL_USERNAME'],
                   recipients=[correo_usuario])
     
+    link = url_for('restablecerClave', token=token, _external=True)
     # 3. Escribimos el cuerpo del mensaje
-    msg.body = "Hola! Para cambiar tu clave entra a este link: (Aquí irá tu link)"
+    msg.body = f"Hola! Para cambiar tu clave entra a este link: {link}"
     
     # 4. El acto de magia: enviar
     try:
@@ -97,13 +102,43 @@ def enviar_recuperacion():
         return "¡Correo enviado con éxito!"
     except Exception as e:
         return f"Error al enviar: {str(e)}"
-    
+# Final ruta recuperación de contraseña
+
+# Ruta para restablecer la contraseña
+@paitApp.route('/restablecer/<token>', methods=['GET', 'POST'])
+def restablecerClave(token):
+    try:
+        correo = generador.loads(token, salt='recuperar-password', max_age=300)
+    except:
+        return "<h1>El link es inválido o ya caducó.</h1>"
+
+    if request.method == 'POST':
+        nueva_clave = request.form['nueva_clave']
+        confirmar = request.form['confirmar_clave']
+        
+        if nueva_clave == confirmar:
+            # 1. Ciframos la nueva clave
+            pass_hash = generate_password_hash(nueva_clave)           
+            # 2. Llamamos al modelo (aquí necesitarás saber de quién es el token)
+            ModelUser.actualizar_password(db, correo, pass_hash)
+            
+            flash("¡Contraseña actualizada!")
+            return redirect(url_for('login'))
+        else:
+            flash("Las contraseñas no coinciden")
+            
+    return render_template('reestablecer.html', token=token)
+
 # Ruta para abrir el formulario de recuperación de contraseña
 @paitApp.route('/Recuperar')
 def recuperar():
     return render_template('recuperar.html')
 
-
+# SingOut
+@paitApp.route('/signout', methods=['GET'])
+def signout():
+    session.clear()
+    return redirect(url_for('registro'))
 
 if __name__ == '__main__':
     paitApp.config.from_object(config['development'])

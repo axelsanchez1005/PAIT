@@ -28,3 +28,17 @@ class ModelUser:
             db.connection.commit()
         except Exception as ex:
             raise Exception(ex)
+        
+    @classmethod
+    def actualizar_password(cls, db, correo, nueva_clave_cifrada):
+        try:
+            print(f"Intentando actualizar a: {correo}") # <--- Mira tu consola negra
+            cursor = db.connection.cursor()
+            # Solo actualizamos la clave donde el correo coincida
+            sql = "UPDATE usuarios SET password = %s WHERE correo = %s"
+            cursor.execute(sql, (nueva_clave_cifrada, correo))
+            db.connection.commit()
+            return True
+        except Exception as ex:
+            print(f"Error en DB: {ex}")
+            return False

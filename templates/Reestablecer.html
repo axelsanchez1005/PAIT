@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}
+Restablecer Contraseña
+{% endblock %}
+{% block contenido %}
+
+<div class="reset-card">
+    <div class="form-section">
+        <h2>Restablecer Contraseña</h2>
+        <p class="instruction">Por favor, ingresa tu nueva contraseña a continuación.</p>
+        
+        <form action="{{ url_for('restablecerClave', token=token) }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="mb-2">
+                <input type="password" name="nueva_clave"  class="form-control" placeholder="Nueva Contraseña" required>
+            </div>
+            <div class="mb-2">
+                <input type="password" name="confirmar_clave" class="form-control" placeholder="Confirmar Contraseña" required>
+            </div>
+            
+            <a href="{{ url_for('registro')}}" class="back-link">¿Volver al inicio de sesión?</a>
+            
+            <div class="text-center text-md-start">
+                <button type="submit" class="btn btn-reset">GUARDAR</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="side-panel">
+        <h1>¡Listo!</h1>
+        <p>Tu contraseña será actualizada al instante. Ya puedes volver a tus actividades.</p>
+    </div>
+</div>
+{% endblock %}
+

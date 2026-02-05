@@ -104,7 +104,6 @@
             font-size: 1.1rem;
             max-width: 250px;
         }
-
         /* Ajuste para móviles */
         @media (max-width: 768px) {
             .welcome-section {

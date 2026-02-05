@@ -1,0 +1,103 @@
+body {
+        font-family: 'Montserrat', sans-serif;
+        background-color: #c9d6ff;
+        background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main-container {
+        background-color: #fff;
+        border-radius: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        position: relative;
+        overflow: hidden;
+        width: 768px;
+        max-width: 100%;
+        min-height: 480px;
+        display: flex;
+    }
+
+    .form-side {
+        width: 50%;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+    }
+
+    .image-side {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 150px 0 0 100px;
+        z-index: 10;
+    }
+
+    .image-overlay {
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('file.svg');
+        background-size: cover;
+        background-position: center;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-align: center;
+        padding: 0 30px;
+    }
+
+    .container-input input {
+        background-color: #eee;
+        border: none;
+        margin: 8px 0;
+        padding: 10px 15px;
+        font-size: 13px;
+        border-radius: 8px;
+        width: 100%;
+        outline: none;
+    }
+
+    .btn-login {
+        background-color: #8fb7ce;
+        color: #fff;
+        font-size: 12px;
+        padding: 10px 45px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-top: 10px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .btn-login:hover {
+        background-color: #5c6bc0;
+        transform: scale(1.05);
+    }
+    a{
+        text-decoration: none;
+        color: #555;
+    }
+    /* Responsividad para móviles */
+    @media (max-width: 768px) {
+        .image-side {
+            display: none;
+            /* Ocultamos la imagen en móviles para dar espacio al login */
+        }
+
+        .form-side {
+            width: 100%;
+        }
+    }
