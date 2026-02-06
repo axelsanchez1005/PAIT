@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-8">
+        <h2 class="text-3xl font-bold text-gray-800">Candidatos Disponibles</h2>
+        <a href="{{ url_for('mi_equipo') }}" class="btn btn-light rounded-pill px-4">
+            <i class="fa-solid fa-arrow-left me-2"></i> Volver al Equipo
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-8">
+        <form action="{{ url_for('buscar_alumnos') }}" method="GET" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label text-xs font-bold text-gray-400 uppercase">Carrera Técnica</label>
+                <select name="carrera" class="form-select border-0 bg-light rounded-3">
+                    <option value="">Todas las carreras</option>
+                    {% for c in ['TPIN', 'TPTE', 'TPBI', 'TPMC', 'TPEA', 'BTAD', 'BTGO'] %}
+                    <option value="{{ c }}" {{ 'selected' if request.args.get('carrera')==c }}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-xs font-bold text-gray-400 uppercase">Semestre</label>
+                <select name="grado" class="form-select border-0 bg-light rounded-3">
+                    <option value="">Cualquier semestre</option>
+                    {% for i in range(1, 9) %}
+                    <option value="{{ i }}" {{ 'selected' if request.args.get('grado')==i|string }}>{{ i }}° Semestre
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100 rounded-3 font-bold py-2">
+                    <i class="fa-solid fa-magnifying-glass me-2"></i> Aplicar Filtros
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        {% for alumno in alumnos %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 transition hover:shadow-md">
+                <div class="d-flex align-items-center mb-3">
+                    <div
+                        class="bg-primary text-white rounded-circle w-12 h-12 flex items-center justify-content-center font-bold text-xl me-3">
+                        {{ alumno.nombre[0] }}
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-gray-800 mb-0">{{ alumno.nombre.split()[0] }} {{
+                            alumno.nombre.split()[-1] }}</h5>
+                        <p class="text-xs text-primary font-bold mb-0">{{ alumno.carrera }} | {{ alumno.grado }}°
+                            Semestre</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-auto">
+                    <button class="btn btn-light btn-sm flex-grow-1 rounded-3" data-bs-toggle="modal"
+                        data-bs-target="#modalBio{{ alumno.id }}">
+                        Ver Perfil
+                    </button>
+                    <form action="{{ url_for('enviar_invitacion', id_receptor=alumno.id) }}" method="POST"
+                        class="flex-grow-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary btn-sm w-100 rounded-3">Invitar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalBio{{ alumno.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0">
+                    <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                        <h5 class="modal-title font-bold">Perfil del Candidato</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="text-center mb-4">
+                            <h4 class="font-bold text-gray-800">{{ alumno.nombre }}</h4>
+                            <span class="badge bg-light text-primary border">{{ alumno.carrera }} - {{ alumno.grado }}°
+                                Semestre</span>
+                        </div>
+                        <h6 class="text-xs font-bold text-gray-400 uppercase mb-2">Sobre mí (Presentación)</h6>
+                        <p class="text-gray-600 bg-light p-3 rounded-3 text-sm italic">
+                            "{{ alumno.presentacion if alumno.presentacion else 'Este alumno aún no ha redactado su
+                            presentación.' }}"
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-12">
+            <i class="fa-solid fa-user-slash text-5xl text-gray-200 mb-4"></i>
+            <h4 class="text-gray-400">No hay alumnos disponibles con estos filtros.</h4>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

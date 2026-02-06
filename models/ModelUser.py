@@ -42,3 +42,45 @@ class ModelUser:
         except Exception as ex:
             print(f"Error en DB: {ex}")
             return False
+
+    @classmethod
+    def obtener_disponibles(cls, db, carrera=None, grado=None, id_excluir=None):
+        try:
+            cursor = db.connection.cursor()
+            # Consulta base: Alumnos (rol 'U') que no están en la tabla miembros_equipo
+            sql = """
+                SELECT id, codigo, nombre, correo, celular, carrera, grado, presentacion 
+                FROM usuarios 
+                WHERE rol = 'U' 
+                AND id NOT IN (SELECT id_usuario FROM miembros_equipo)
+            """
+            params = []
+
+            # Filtros dinámicos
+            if carrera:
+                sql += " AND carrera = %s"
+                params.append(carrera)
+            if grado:
+                sql += " AND grado = %s"
+                params.append(grado)
+            
+            # Evitar que el emisor se vea a sí mismo (por si acaso)
+            if id_excluir:
+                sql += " AND id != %s"
+                params.append(id_excluir)
+
+            cursor.execute(sql, params)
+            rows = cursor.fetchall()
+            
+            alumnos = []
+            for r in rows:
+                # Usamos la entidad User (id, codigo, nombre, password, rol, correo, celular)
+                # Agregamos la presentación/bio como atributo extra si tu entidad lo permite
+                u = User(r[0], r[1], r[2], None, 'U', r[3], r[4])
+                u.carrera = r[5]
+                u.grado = r[6]
+                u.presentacion = r[7]
+                alumnos.append(u)
+            return alumnos
+        except Exception as ex:
+            raise Exception(ex)

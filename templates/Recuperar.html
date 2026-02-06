@@ -1,29 +1,29 @@
 {% extends "layout.html" %}
 {% block head_css %}
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/recuperar.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='css/recuperar.css') }}">
 {% endblock %}
 
-{% block title %}
-Recuperar Contraseña
-{% endblock %}
+{% block title %}Recuperar Contraseña{% endblock %}
 {% block contenido %}
 
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
             <div class="login-card shadow d-flex">
-                
+
                 <div class="form-section col-12 col-md-6">
                     <h2>Recuperar Contraseña</h2>
-                    
+
                     <form action="{{ url_for('enviar_recuperacion')}}" method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                         <div class="mb-3">
-                            <input type="email" name="email_usuario"  class="form-control" placeholder="Correo electrónico" required>
+                            <input type="email" name="email_usuario" class="form-control"
+                                placeholder="Correo electrónico" required>
                         </div>
-                        
-                        <a href="{{ url_for('registro') }}" class="link-back">¿Recordaste tu contraseña? Inicia sesión</a>
-                        
+
+                        <a href="{{ url_for('index') }}" class="link-back">¿Recordaste tu contraseña? Inicia
+                            sesión</a>
+
                         <div class="text-center text-md-start">
                             <button type="submit" class="btn btn-entrar">ENVIAR</button>
                         </div>

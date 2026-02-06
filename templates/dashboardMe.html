@@ -1,0 +1,124 @@
+{% extends 'layout.html' %}
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
+<style>
+    :root {
+        --color-mentor: #059669;
+    }
+
+    /* Color Esmeralda */
+    .sidebar {
+        background: linear-gradient(180deg, #064e3b 0%, #065f46 100%);
+    }
+
+    .icon-mentor {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="bg-decoration"
+    style="background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent);"></div>
+
+<div class="offcanvas-lg offcanvas-start sidebar position-fixed border-0" tabindex="-1" id="sidebarOffcanvas">
+    <div class="d-flex flex-column h-100 p-3">
+        <div class="py-5 text-center">
+            <div
+                class="bg-white/20 rounded-circle w-16 h-16 mx-auto mb-3 flex items-center justify-content-center border-2 border-white/50">
+                <span class="text-white fw-bold text-2xl">M</span>
+            </div>
+            <h4 class="text-white fw-bold">AlliApp <small class="d-block text-xs opacity-75">Panel Mentor</small></h4>
+        </div>
+
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li><a href="{{ url_for('dashboard_mentor') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-house me-3"></i> Inicio</a></li>
+            <li><a href="{{ url_for('mis_equipos_mentor') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-chalkboard-user me-3"></i> Mis Equipos</a></li>
+            <li><a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#modalPerfil"><i
+                        class="fa-solid fa-user-gear me-3"></i> Perfil</a></li>
+        </ul>
+
+        <div class="p-3">
+            <a href="{{ url_for('signout') }}" class="nav-link text-white opacity-70"><i
+                    class="fa-solid fa-right-from-bracket me-3"></i> Salir</a>
+        </div>
+    </div>
+</div>
+
+<main class="main-content p-4 p-md-5">
+    <header class="mb-10">
+        <div class="badge bg-emerald-100 text-emerald-700 px-3 py-2 rounded-pill mb-3 font-bold text-xs">MENTOR
+            ACADÉMICO</div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Bienvenido, Prof. {{ session.get('nombre').split()[0] }}</h1>
+        <p class="text-gray-600 font-medium">Gestione y asesore sus proyectos asignados.</p>
+    </header>
+
+    <div class="container-fluid px-0">
+        <div class="row">
+            {% if tiene_equipos %}
+            <div class="col-12 col-md-6 col-xl-4">
+                <a href="{{ url_for('mis_equipos_mentor') }}" class="text-decoration-none">
+                    <div class="card custom-card h-100 p-4 transition hover:scale-105"
+                        style="border-left: 5px solid #059669;">
+                        <div class="card-body d-flex align-items-center p-0">
+                            <div class="icon-container me-4 icon-mentor"><i class="fa-solid fa-layer-group"></i></div>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 mb-1">Mis Equipos</h3>
+                                <p class="text-sm text-gray-500 mb-0">Ver y gestionar asesorías.</p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="bg-white p-10 rounded-[40px] shadow-sm border border-dashed border-emerald-300 text-center">
+                    <div
+                        class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">No tiene equipos asignados</h3>
+                    <p class="text-gray-500 mb-6 max-w-md mx-auto">Actualmente no figura como mentor de ningún proyecto
+                        PAIT. Si cree que esto es un error, puede notificarlo.</p>
+                    <button
+                        class="btn btn-primary rounded-pill px-5 py-2 font-bold bg-emerald-600 border-0 hover:bg-emerald-700">
+                        Avisar al Administrador
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<div class="modal fade" id="modalPerfil" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header bg-emerald-600 text-white border-0">
+                <h5 class="font-bold">Perfil del Mentor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('actualizar_perfil') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body p-4">
+                    <input type="text" name="celular" class="form-control mb-3" placeholder="Celular"
+                        value="{{ session.get('celular', '') }}">
+                    <input type="email" name="correo" class="form-control mb-3" placeholder="Correo"
+                        value="{{ session.get('correo', '') }}" readonly>
+                    <textarea name="presentacion" class="form-control" rows="3"
+                        placeholder="Breve reseña profesional..."></textarea>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-success w-100 bg-emerald-600 border-0">Actualizar
+                        Información</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
