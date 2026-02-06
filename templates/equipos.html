@@ -1,0 +1,69 @@
+{% extends 'layout.html' %}
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
+{% endblock %}
+
+{% block titulo %}Lista de Equipos{% endblock %}
+
+{% block contenido %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-10">
+        <h1 class="text-3xl font-bold text-gray-800">Equipos PAIT</h1>
+        <a href="{{ url_for('dashboard_alumno') }}" class="btn btn-light rounded-pill px-4 shadow-sm">
+            <i class="fa-solid fa-arrow-left me-2"></i> Volver
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for equipo in equipos %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-[30px] p-4 h-100">
+                <div class="badge bg-blue-100 text-blue-600 rounded-pill mb-3 w-fit px-3 py-1 text-xs font-bold">
+                    ACTIVO
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">{{ equipo.nombre }}</h3>
+                <p class="text-gray-500 text-sm mb-4 line-clamp-2">{{ equipo.idea }}</p>
+
+                <button type="button" class="btn btn-primary w-100 rounded-2xl py-2 font-bold" data-bs-toggle="modal"
+                    data-bs-target="#modalEquipo{{ equipo.id }}">
+                    Ver Equipo
+                </button>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalEquipo{{ equipo.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-[30px] border-0">
+                    <div class="modal-header border-0 p-4">
+                        <h5 class="modal-title font-bold text-2xl">{{ equipo.nombre }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 pt-0">
+                        <div class="mb-4">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">La Idea</label>
+                            <p class="text-gray-600 mt-1">{{ equipo.idea }}</p>
+                        </div>
+                        <div class="mb-4">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Líder del
+                                Proyecto</label>
+                            <p class="text-gray-800 font-medium">{{ equipo.nombre_lider }}</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4">
+                        <form action="{{ url_for('solicitar_unirse', id_equipo=equipo.id) }}" method="POST"
+                            class="w-100">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-2xl font-bold">
+                                Solicitar Unirse
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

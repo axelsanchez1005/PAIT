@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block head_css %}
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/registro.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='css/registro.css') }}">
 {% endblock %}
 {% block titulo %}PAIT{% endblock %}
 {% block contenido %}
@@ -25,13 +25,12 @@
             <div class="container-input">
                 <input type="text" name="codigo" placeholder="Código" required />
                 <input type="password" name="password" placeholder="NIP" required />
-                <input type="text" name="celular" placeholder="Número de Celular" required />
-                <input type="email" name="correo" placeholder="Correo Electrónico" required />
             </div>
             <div>
-            <a href="{{ url_for('recuperar')}}" class="text-xs text-gray-600 no-underline block my-3 hover:text-cyan-600">
-                ¿Olvidaste tu NIP?
-            </a>
+                <a href="{{ url_for('recuperar')}}"
+                    class="text-xs text-gray-600 no-underline block my-3 hover:text-cyan-600">
+                    ¿Olvidaste tu NIP?
+                </a>
             </div>
             <button type="submit" class="btn-login shadow-sm">Entrar</button>
         </form>
