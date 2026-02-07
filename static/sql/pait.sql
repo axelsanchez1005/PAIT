@@ -222,7 +222,7 @@ ALTER TABLE `mentores`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
@@ -250,6 +250,16 @@ ALTER TABLE `miembros_equipo`
   ADD CONSTRAINT `miembros_equipo_ibfk_1` FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `miembros_equipo_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 COMMIT;
+
+CREATE TABLE anuncios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_equipo INT,
+    id_usuario INT, -- Quién lo publica (Mentor)
+    contenido TEXT,
+    fecha_publicacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_equipo) REFERENCES equipos(id),
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

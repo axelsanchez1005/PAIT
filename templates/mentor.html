@@ -1,0 +1,111 @@
+{% extends 'layout.html' %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/cardsAdmin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/estilosAdmin.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Ajuste para que el contenido no quede oculto tras el sidebar */
+        .admin-layout { display: flex; height: 100vh; overflow: hidden; }
+        .main-container { flex: 1; overflow-y: auto; background-color: #f8f9fa; }
+        .bg-admin-dark { background-color: #1a202c; } /* Ajusta al color exacto de tu sidebar */
+    </style>
+{% endblock %}
+
+{% block titulo %}Administrar Mentores{% endblock %}
+
+{% block contenido %}
+
+<div class="admin-layout">
+    <aside class="w-64 bg-admin-dark text-white hidden md:flex flex-col flex-shrink-0">
+        <div class="p-8 text-center border-b border-gray-700">
+            <div class="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold">
+                <span class="text-gray-700">{{ session['nombre'][0] if session['nombre'] else 'A' }}</span>
+            </div>
+            <h2 class="text-xl font-bold uppercase">PAIT</h2>
+            <p class="text-xs opacity-70">Panel Administrador</p>
+        </div>
+
+        <nav class="mt-8 flex-grow">
+            <a href="{{ url_for('dashboard_admin') }}" class="flex items-center px-8 py-3 text-sm hover:bg-gray-700 transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Inicio
+            </a>
+            <a href="{{ url_for('vista_mentores') }}" class="flex items-center px-8 py-3 text-sm bg-gray-800 border-l-4 border-green-500 transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 15.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 01-12 0v1z"></path></svg>
+                Mentores
+            </a>
+            <a href="#" class="flex items-center px-8 py-3 text-sm hover:bg-gray-700 transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Proyectos
+            </a>
+        </nav>
+
+        <div class="p-8 border-t border-gray-700">
+            <a href="{{ url_for('signout') }}" class="flex items-center py-2 text-sm opacity-80 hover:opacity-100">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Salir
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-container p-10">
+        <header class="mb-10">
+            <span class="text-green-600 font-semibold tracking-widest text-xs uppercase">Administrador de Sistema</span>
+            <h1 class="text-4xl font-bold text-gray-800">Gestión de Mentores</h1>
+            <p class="text-gray-500 mt-2">Asigna mentores a los proyectos y equipos disponibles.</p>
+        </header>
+
+        <div class="row">
+            {% for mentor in mentores %}
+            <div class="col-md-4 mb-4">
+                <div class="card mentor-card h-100 shadow-sm border-0" style="cursor: pointer; border-radius: 15px;" 
+                     data-bs-toggle="modal" data-bs-target="#modalMentor{{ mentor[0] }}">
+                    <div class="card-body text-center p-5">
+                        <div class="mentor-icon-container mb-4 mx-auto bg-light rounded-circle d-flex align-items-center justify-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-user-tie fa-2x text-dark"></i>
+                        </div>
+                        <h5 class="fw-bold text-gray-800 mb-1">{{ mentor[1] }}</h5>
+                        <p class="text-muted small mb-4">Código: {{ mentor[2] }}</p>
+                        <button class="btn btn-outline-success btn-sm rounded-pill px-4">Asignar Equipo</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modalMentor{{ mentor[0] }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                        <form action="{{ url_for('guardar_asignacion') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" name="id_mentor" value="{{ mentor[0] }}">
+                            
+                            <div class="modal-header bg-dark text-white p-4" style="border-radius: 20px 20px 0 0;">
+                                <h5 class="modal-title font-bold">Asignar Equipo a {{ mentor[1] }}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-5">
+                                <p class="text-muted mb-4">Selecciona un equipo de la lista para vincularlo con este mentor.</p>
+                                <div class="mb-3">
+                                    <label class="form-label font-bold text-gray-700">Equipo disponible</label>
+                                    <select name="id_equipo" class="form-select form-select-lg border-2 shadow-sm" required>
+                                        <option value="" selected disabled>Escoger equipo...</option>
+                                        {% for equipo in equipos %}
+                                        <option value="{{ equipo[0] }}">{{ equipo[1] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light p-4" style="border-radius: 0 0 20px 20px;">
+                                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="submit" class="btn btn-success px-5 font-bold">Confirmar Asignación</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+
+{% endblock %}

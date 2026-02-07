@@ -239,35 +239,110 @@ def solicitar_unirse(id_equipo):
             
     return redirect(url_for('lista_equipos'))
 
-@paitApp.route('/mi_equipo')
-def mi_equipo():
+# Se modifico la funcion mi_equipo
+@paitApp.route('/tablon/<int:id_equipo>')
+def tablon(id_equipo):
     if 'user_id' not in session: return redirect(url_for('index'))
     
     id_usuario = session['user_id']
-    # Obtenemos el equipo al que pertenece el usuario
-    equipo = ModelEquipo.obtener_equipo_usuario(db, id_usuario)
+    rol = session.get('rol')
     
+    # 1. Obtener datos del equipo
+    equipo = ModelEquipo.obtener_por_id(db, id_equipo)
     if not equipo:
-        flash("Aún no perteneces a ningún equipo.", "info")
+        flash("Equipo no encontrado", "danger")
+        return redirect(url_for('dashboard_alumno'))
+
+    # 2. Obtener integrantes y CONTARLOS (Esto es lo que falta)
+    integrantes = ModelEquipo.obtener_miembros(db, id_equipo)
+    total_miembros = len(integrantes)  # <--- AQUÍ SE DEFINE
+
+    # 3. Lógica de permisos
+    es_mentor = (rol == 'M' and equipo.id_mentor == id_usuario)
+    es_lider = (equipo.id_lider == id_usuario)
+    
+    # 4. Obtener anuncios
+    cur = db.connection.cursor()
+    cur.execute("""
+        SELECT a.contenido, a.fecha_publicacion, u.nombre 
+        FROM anuncios a JOIN usuarios u ON a.id_usuario = u.id 
+        WHERE a.id_equipo = %s ORDER BY a.fecha_publicacion DESC
+    """, [id_equipo])
+    anuncios = cur.fetchall()
+    
+    # IMPORTANTE: Pasa 'total_miembros' aquí abajo
+    return render_template('tablon.html', 
+                           equipo=equipo, 
+                           anuncios=anuncios, 
+                           integrantes=integrantes,
+                           total_miembros=total_miembros, # <--- SE ENVÍA AL HTML
+                           es_mentor=es_mentor,
+                           es_lider=es_lider)
+
+#FUNCIONES PARA LINK DE WASAP Y ANUNCIOS
+@paitApp.route('/publicar_anuncio/<int:id_equipo>', methods=['POST'])
+def publicar_anuncio(id_equipo):
+    # Seguridad: Solo Mentores pueden publicar
+    if session.get('rol') != 'M':
+        flash("No tienes permiso para publicar anuncios.", "danger")
+        return redirect(url_for('tablon', id_equipo=id_equipo))
+
+    contenido = request.form.get('contenido')
+    if contenido:
+        cur = db.connection.cursor()
+        cur.execute("""
+            INSERT INTO anuncios (id_equipo, id_usuario, contenido) 
+            VALUES (%s, %s, %s)
+        """, (id_equipo, session['user_id'], contenido))
+        db.connection.commit()
+        flash("Anuncio publicado.", "success")
+    
+    return redirect(url_for('tablon', id_equipo=id_equipo))
+
+@paitApp.route('/actualizar_link/<int:id_equipo>', methods=['POST'])
+def actualizar_link(id_equipo):
+    id_usuario = session['user_id']
+    link = request.form.get('link_whatsapp')
+    
+    # Verificamos si es el Mentor o el Líder antes de actualizar
+    cur = db.connection.cursor()
+    cur.execute("SELECT id_lider, id_mentor FROM equipos WHERE id = %s", [id_equipo])
+    equipo_data = cur.fetchone()
+    
+    if equipo_data and (id_usuario == equipo_data[0] or id_usuario == equipo_data[1]):
+        cur.execute("UPDATE equipos SET link_whatsapp = %s WHERE id = %s", (link, id_equipo))
+        db.connection.commit()
+        flash("Link de comunicación actualizado.", "success")
+    else:
+        flash("No tienes permiso para modificar el link.", "danger")
+
+    return redirect(url_for('tablon', id_equipo=id_equipo))
+
+#MI EQUIPO  
+@paitApp.route('/mi_equipo')
+def mi_equipo():
+    if 'user_id' not in session: 
+        return redirect(url_for('index'))
+    
+    # Buscamos el equipo del usuario en la DB
+    equipo = ModelEquipo.obtener_equipo_usuario(db, session['user_id'])
+    
+    if equipo:
+        # Redirigimos al tablon usando el ID del equipo encontrado
+        return redirect(url_for('tablon', id_equipo=equipo.id))
+    else:
+        flash("Aún no tienes un equipo.", "info")
         return redirect(url_for('dashboard_alumno'))
     
-    # Obtenemos los integrantes reales
-    integrantes = ModelEquipo.obtener_miembros(db, equipo.id)
-    # Obtenemos el conteo para la validación de cupo
-    total_miembros = len(integrantes)
-    
-    return render_template('miequipo.html', 
-                           equipo=equipo, 
-                           integrantes=integrantes, 
-                           total_miembros=total_miembros)
-
+#MIS EQUIPOS MENTORES
 @paitApp.route('/mis_equipos_mentor')
-def mis_equipos_mentor():
+def mis_equipos_mentor():  # <--- ESTE NOMBRE es el que busca url_for
     if 'user_id' not in session or session.get('rol') != 'M':
         return redirect(url_for('index'))
         
     equipos = ModelEquipo.obtener_equipos_mentor(db, session['user_id'])
     return render_template('equiposMe.html', equipos=equipos)
+
 
 @paitApp.route('/buscar_alumnos')
 def buscar_alumnos():
@@ -323,8 +398,43 @@ def procesar_invitacion(id_inv, accion):
     exito, mensaje = ModelEquipo.responder_invitacion(db, id_inv, accion, session['user_id'])
     flash(mensaje, "success" if exito else "danger")
     
-    return redirect(url_for('dashboard_alumno'))
+    return redirect(url_for('dashboard_alumno')) 
 
+# parte de administrar mentores mediante el admin
+
+@paitApp.route('/admin/mentores')
+def vista_mentores():
+    if session.get('rol') != 'A':
+        return redirect(url_for('login'))
+
+    cursor = db.connection.cursor()
+    # 1. Traemos a los mentores
+    cursor.execute("SELECT id, nombre, codigo FROM usuarios WHERE rol = 'M'")
+    mentores = cursor.fetchall()
+
+    # 2. Traemos los equipos
+    cursor.execute("SELECT id, nombre FROM equipos")
+    equipos = cursor.fetchall()
+
+    return render_template('mentor.html', mentores=mentores, equipos=equipos)
+
+@paitApp.route('/admin/asignar_equipo', methods=['POST'])
+def guardar_asignacion():
+    id_mentor = request.form.get('id_mentor')
+    id_equipo = request.form.get('id_equipo')
+
+    cursor = db.connection.cursor()
+    
+    # OPCIONAL: Quitar al mentor de cualquier equipo anterior para que no tenga dos
+    cursor.execute("UPDATE equipos SET id_mentor = NULL WHERE id_mentor = %s", (id_mentor,))
+    
+    # Asignar al nuevo equipo
+    sql = "UPDATE equipos SET id_mentor = %s WHERE id = %s"
+    cursor.execute(sql, (id_mentor, id_equipo))
+    
+    db.connection.commit()
+    flash("¡Equipo asignado correctamente!", "success")
+    return redirect(url_for('vista_mentores'))
 
 if __name__ == '__main__':
     paitApp.config.from_object(config['development'])

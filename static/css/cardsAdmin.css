@@ -1,0 +1,64 @@
+/* Contenedor Principal */
+.main-content {
+    background-color: #f8f9fa; /* Gris muy claro igual al de tu imagen */
+    padding: 30px;
+    min-height: 100vh;
+}
+
+/* Estilo de las Cards de Mentores */
+.mentor-card {
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.mentor-card:hover {
+    transform: translateY(-10px);
+    shadow: 0 10px 20px rgba(0,0,0,0.1);
+    border-color: #00b894; /* Verde esmeralda como el botón de tu reporte */
+}
+
+.mentor-icon-container {
+    width: 80px;
+    height: 80px;
+    background: #f1f2f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    color: #2d3436;
+}
+
+/* Badges y Botones */
+.badge-status {
+    background-color: #e3fcef;
+    color: #00b894;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* Estilo del Modal */
+.modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    background-color: #1e272e; /* Oscuro como tu sidebar */
+    color: white;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.modal-footer .btn-primary {
+    background-color: #00b894;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 10px;
+}
