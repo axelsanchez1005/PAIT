@@ -135,7 +135,7 @@ CREATE TABLE `usuarios` (
   `codigo` int NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `rol` enum('U','M') NOT NULL COMMENT 'U=Alumno, M=Mentor',
+  `rol` enum('U','M','A') NOT NULL COMMENT 'U=Alumno, M=Mentor',
   `correo` varchar(255) DEFAULT NULL,
   `celular` varchar(20) DEFAULT NULL,
   `carrera` varchar(10) DEFAULT NULL,
@@ -153,7 +153,8 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id`, `codigo`, `nombre`, `password`, `rol`, `correo`, `celular`, `carrera`, `grado`, `grupo`, `turno`, `ingreso`, `invitados`, `presentacion`) VALUES
 (1, 222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'scrypt:32768:8:1$B9ExGPuhbkc4HFHz$b6784a61489a2e22b23b1484d2bf698f9b8f7c38d4a335deb5c1026276ee7f033d97246c35ee5c95603c57f063a1636e58976a086ba27ad528d438eb138347aa', 'U', 'axel.sanchez1005@alumnos.udg.mx', '3321793454', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05', 0, NULL),
-(2, 8903727, 'GONZALES PEÑANIETO JOSE PEPE', 'polomatute', 'M', 'jose.gonzales1044@academicos.udg.mx', '1321780000', NULL, NULL, NULL, NULL, NULL, 0, NULL);
+(2, 8903727, 'GONZALES PEÑANIETO JOSE PEPE', 'polomatute', 'M', 'jose.gonzales1044@academicos.udg.mx', '1321780000', NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(3, 222910052, 'juan', 'polimatute', 'A', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
 
 --
 -- Índices para tablas volcadas

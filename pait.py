@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session
 from flask_mysqldb import MySQL
 from flask_wtf.csrf import CSRFProtect
 from config import config
@@ -30,8 +30,11 @@ def index():
     return render_template('registro.html')
 
 # login
-@paitApp.route('/login', methods=['POST'])
+@paitApp.route('/login', methods=['GET','POST'])
 def login():
+    if request.method == 'GET':
+        return redirect(url_for('index'))
+    
     codigo = request.form.get('codigo')
     password = request.form.get('password')
 
@@ -46,12 +49,15 @@ def login():
         session['rol'] = user_logged.rol
         session['nombre'] = user_logged.nombre
         
-        # Guardamos si tiene datos completos para el modal
         session['datos_completos'] = bool(user_logged.correo and user_logged.celular)
 
-        if user_logged.rol == 'M':
+        #Identificar Roles
+        if user_logged.rol == 'A':
+            return redirect(url_for('dashboard_admin'))
+        elif user_logged.rol == 'M':
             return redirect(url_for('dashboard_mentor'))
-        return redirect(url_for('dashboard_alumno'))
+        else:
+            return redirect(url_for('dashboard_alumno'))
     
     flash("Código o contraseña incorrectos.", "danger")
     return redirect(url_for('index'))
@@ -102,6 +108,15 @@ def dashboard_mentor():
     # Verificamos si tiene equipos asignados
     equipos = ModelEquipo.obtener_equipos_mentor(db, session['user_id'])
     return render_template('dashboardMe.html', tiene_equipos=len(equipos) > 0)
+
+@paitApp.route('/dashboard_admin')
+def dashboard_admin():
+    if 'user_id' not in session or session.get('rol') != 'A':
+        return redirect(url_for('index'))
+    
+    return render_template('dashboardAd.html')
+
+
 
 # Ruta para la página de recuperación de contraseña
 @paitApp.route('/enviar_recuperacion', methods=['GET', 'POST'])

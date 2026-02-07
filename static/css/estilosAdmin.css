@@ -1,0 +1,4 @@
+        body { font-family: 'Inter', sans-serif; }
+        .bg-admin-dark { background-color: #212b28; }
+        .sidebar-item:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .main-gradient { background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%); }

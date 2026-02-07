@@ -1,22 +1,43 @@
 from .entities.User import User
+from werkzeug.security import generate_password_hash
 
 class ModelUser:
     @classmethod
     def login(cls, db, codigo, password):
         try:
             cursor = db.connection.cursor()
-            # Buscamos en la tabla unificada por código
+            # Buscamos al usuario por su código
             sql = "SELECT id, codigo, nombre, password, rol, correo, celular FROM usuarios WHERE codigo = %s"
             cursor.execute(sql, (codigo,))
-            rows = cursor.fetchall()
+            row = cursor.fetchone() # Usamos fetchone porque el código debe ser único
 
-            for row in rows:
-                # Instanciamos la entidad para usar su método de verificación
+            if row:
+                # Creamos la entidad usuario
                 user_entity = User(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                clave_en_db = row[3] # La columna 'password' de tu tabla
+
+                # 1. CASO ESPECIAL: Si la contraseña en la DB es texto plano 'polimatute'
+                if clave_en_db == "polimatute":
+                    if password == "polimatute":
+                        # --- AUTO-CIFRADO ---
+                        # Aprovechamos que entró para corregir su contraseña en la DB
+                        nueva_clave_hash = generate_password_hash("polimatute")
+                        cursor_update = db.connection.cursor()
+                        sql_update = "UPDATE usuarios SET password = %s WHERE id = %s"
+                        cursor_update.execute(sql_update, (nueva_clave_hash, user_entity.id))
+                        db.connection.commit()
+                        
+                        return user_entity
+                    else:
+                        return None
+
+                # 2. CASO NORMAL: Verificación por Hash (el que ya tenías)
                 if User.check_password(user_entity.password, password, user_entity.rol):
                     return user_entity
+                    
             return None
         except Exception as ex:
+            print(f"Error en Login: {ex}")
             raise Exception(ex)
 
     @classmethod
