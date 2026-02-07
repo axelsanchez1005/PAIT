@@ -71,17 +71,13 @@ class ModelEquipo:
     @classmethod
     def obtener_por_id(cls, db, id):
         cursor = db.connection.cursor()
-        # Hacemos JOIN con usuarios para traer el nombre del líder
-        sql = """
-            SELECT e.id, e.nombre, e.idea, e.id_lider, u.nombre as nombre_lider 
-            FROM equipos e 
-            JOIN usuarios u ON e.id_lider = u.id 
-            WHERE e.id = %s
-        """
-        cursor.execute(sql, [id])
+        # Verifica que el orden coincida con tu __init__ de la clase Equipo
+        sql = "SELECT id, nombre, idea, id_lider, id_mentor, link_whatsapp FROM equipos WHERE id = %s"
+        cursor.execute(sql, (id,))
         row = cursor.fetchone()
         if row:
-            return Equipo(row[0], row[1], row[2], row[3], nombre_lider=row[4])
+            # Si tu constructor es (id, nombre, idea, id_lider, id_mentor, link)
+            return Equipo(row[0], row[1], row[2], row[3], row[4], row[5])
         return None
 
     @classmethod
@@ -186,3 +182,20 @@ class ModelEquipo:
             return equipos
         except Exception as ex:
             raise Exception(ex)
+    @classmethod
+    def asignar_mentor(cls, db, id_equipo, id_mentor):
+        try:
+            cursor = db.connection.cursor()
+            
+            # 1. (Opcional) Si quieres que el mentor solo tenga UN equipo:
+            # cursor.execute("UPDATE equipos SET id_mentor = NULL WHERE id_mentor = %s", (id_mentor,))
+            
+            # 2. Asignar al nuevo equipo
+            sql = "UPDATE equipos SET id_mentor = %s WHERE id = %s"
+            cursor.execute(sql, (id_mentor, id_equipo))
+            
+            db.connection.commit()
+            return True
+        except Exception as ex:
+            print(f"Error en el modelo: {ex}")
+            return False  

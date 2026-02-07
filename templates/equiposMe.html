@@ -1,32 +1,23 @@
 {% extends 'layout.html' %}
-{% block head_css %}
-<link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
-{% endblock %}
-
 {% block contenido %}
-<script src="https://cdn.tailwindcss.com"></script>
-
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Mis Proyectos Asesorados</h1>
-        <a href="{{ url_for('dashboard_mentor') }}" class="btn btn-outline-secondary rounded-pill px-4">Volver</a>
-    </div>
-
-    <div class="row g-4">
+<div class="container mt-5">
+    <h2 class="mb-4">Mis Equipos Asignados</h2>
+    <div class="row">
         {% for equipo in equipos %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 border-top border-4 border-emerald-500">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ equipo.nombre }}</h3>
-                <p class="text-gray-500 text-sm mb-4 line-clamp-2">{{ equipo.idea }}</p>
-                <div class="bg-light p-3 rounded-3 mb-4">
-                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Líder de equipo</p>
-                    <p class="text-sm font-medium text-gray-700 mb-0">{{ equipo.nombre_lider }}</p>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h5 class="card-title font-bold text-primary">{{ equipo[1] }}</h5>
+                    <p class="card-text text-muted small">{{ equipo[2] }}</p>
+                    <a href="{{ url_for('tablon', id_equipo=equipo.id) }}" class="btn btn-dark w-100 rounded-pill">
+                        Ver Tablón de Actividades
+                    </a>
                 </div>
-                <a href="{{ url_for('mi_equipo_id', id_equipo=equipo.id) }}"
-                    class="btn btn-emerald-600 text-white w-100 rounded-3 py-2 bg-emerald-600">
-                    Entrar al Panel
-                </a>
             </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center">
+            <p class="text-muted">Aún no tienes equipos asignados por el administrador.</p>
         </div>
         {% endfor %}
     </div>

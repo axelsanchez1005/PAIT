@@ -418,22 +418,26 @@ def vista_mentores():
 
     return render_template('mentor.html', mentores=mentores, equipos=equipos)
 
-@paitApp.route('/admin/asignar_equipo', methods=['POST'])
+# ÚNICA RUTA PARA ASIGNAR
+@paitApp.route('/admin/guardar_asignacion', methods=['POST'])
 def guardar_asignacion():
+    # Seguridad: Solo admin
+    if session.get('rol') != 'A': 
+        return redirect(url_for('login'))
+    
     id_mentor = request.form.get('id_mentor')
     id_equipo = request.form.get('id_equipo')
+    
+    if not id_mentor or not id_equipo:
+        flash("Datos incompletos", "warning")
+        return redirect(url_for('vista_mentores'))
 
-    cursor = db.connection.cursor()
-    
-    # OPCIONAL: Quitar al mentor de cualquier equipo anterior para que no tenga dos
-    cursor.execute("UPDATE equipos SET id_mentor = NULL WHERE id_mentor = %s", (id_mentor,))
-    
-    # Asignar al nuevo equipo
-    sql = "UPDATE equipos SET id_mentor = %s WHERE id = %s"
-    cursor.execute(sql, (id_mentor, id_equipo))
-    
-    db.connection.commit()
-    flash("¡Equipo asignado correctamente!", "success")
+    # Usamos el modelo para procesar la lógica pesada
+    if ModelEquipo.asignar_mentor(db, id_equipo, id_mentor):
+        flash("Mentor asignado correctamente al equipo.", "success")
+    else:
+        flash("Hubo un error al realizar la asignación.", "danger")
+        
     return redirect(url_for('vista_mentores'))
 
 if __name__ == '__main__':
