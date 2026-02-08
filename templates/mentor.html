@@ -1,14 +1,19 @@
 {% extends 'layout.html' %}
 
 {% block head_css %}
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/cardsAdmin.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/estilosAdmin.css') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
+
     <style>
-        /* Ajuste para que el contenido no quede oculto tras el sidebar */
-        .admin-layout { display: flex; height: 100vh; overflow: hidden; }
-        .main-container { flex: 1; overflow-y: auto; background-color: #f8f9fa; }
-        .bg-admin-dark { background-color: #1a202c; } /* Ajusta al color exacto de tu sidebar */
+    .sidebar {
+        background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+    }
+
+    /* Indigo Dark */
+    .icon-admin {
+        background: rgba(79, 70, 229, 0.1);
+        color: #4f46e5;
+    }
     </style>
 {% endblock %}
 
@@ -16,40 +21,34 @@
 
 {% block contenido %}
 
-<div class="admin-layout">
-    <aside class="w-64 bg-admin-dark text-white hidden md:flex flex-col flex-shrink-0">
-        <div class="p-8 text-center border-b border-gray-700">
-            <div class="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold">
-                <span class="text-gray-700">{{ session['nombre'][0] if session['nombre'] else 'A' }}</span>
+
+<div class="offcanvas-lg offcanvas-start sidebar position-fixed border-0" tabindex="-1" id="sidebarOffcanvas">
+    <div class="d-flex flex-column h-100 p-3">
+        <div class="py-5 text-center">
+            <div
+                class="bg-white/20 rounded-circle w-16 h-16 mx-auto mb-3 flex items-center justify-content-center border-2 border-white/50">
+                <span class="text-white fw-bold text-2xl">A</span>
             </div>
-            <h2 class="text-xl font-bold uppercase">PAIT</h2>
-            <p class="text-xs opacity-70">Panel Administrador</p>
+            <h4 class="text-white fw-bold">AlliApp <small class="d-block text-xs opacity-75">Panel Admin</small></h4>
         </div>
 
-        <nav class="mt-8 flex-grow">
-            <a href="{{ url_for('dashboard_admin') }}" class="flex items-center px-8 py-3 text-sm hover:bg-gray-700 transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                Inicio
-            </a>
-            <a href="{{ url_for('vista_mentores') }}" class="flex items-center px-8 py-3 text-sm bg-gray-800 border-l-4 border-green-500 transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 15.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 01-12 0v1z"></path></svg>
-                Mentores
-            </a>
-            <a href="#" class="flex items-center px-8 py-3 text-sm hover:bg-gray-700 transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                Proyectos
-            </a>
-        </nav>
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li><a href="{{ url_for('dashboard_admin') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-chart-line me-3"></i> Inicio</a></li>
+            <li><a href="{{ url_for('acciones_admin') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-gears me-3"></i> Acciones</a></li>
+            <li><a href="{{ url_for('vista_mentores') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-user-tie me-3"></i> Mentores</a></li>
+        </ul>
 
-        <div class="p-8 border-t border-gray-700">
-            <a href="{{ url_for('signout') }}" class="flex items-center py-2 text-sm opacity-80 hover:opacity-100">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                Salir
-            </a>
+        <div class="p-3">
+            <a href="{{ url_for('signout') }}" class="nav-link text-white opacity-70"><i
+                    class="fa-solid fa-right-from-bracket me-3"></i> Salir</a>
         </div>
-    </aside>
+    </div>
+</div>
 
-    <main class="main-container p-10">
+<main class="main-content p-4 p-md-5">
         <header class="mb-10">
             <span class="text-green-600 font-semibold tracking-widest text-xs uppercase">Administrador de Sistema</span>
             <h1 class="text-4xl font-bold text-gray-800">Gestión de Mentores</h1>
@@ -106,6 +105,6 @@
             {% endfor %}
         </div>
     </main>
-</div>
+
 
 {% endblock %}
