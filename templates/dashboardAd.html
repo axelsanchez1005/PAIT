@@ -1,98 +1,86 @@
 {% extends "layout.html" %}
 {% block head_css %}
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/estilosAdmin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
+<style>
+    .sidebar {
+        background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+    }
+
+    /* Indigo Dark */
+    .icon-admin {
+        background: rgba(79, 70, 229, 0.1);
+        color: #4f46e5;
+    }
+</style>
 {% endblock %}
 
-{% block scripts %}
-        <script src="{{ url_for('static',filename='js/admin.js') }}"></script>
-{% endblock %}
-
-{% block titulo %}Dashboard Admin{% endblock %}
 {% block contenido %}
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <div class="flex h-screen overflow-hidden">
-        
-        <aside class="w-64 bg-admin-dark text-white hidden md:flex flex-col">
-            <div class="p-8 text-center border-b border-green-800">
-                <div class="w-20 h-20 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center text-dark text-2xl font-bold">
-                    <span class="text-gray-700">A</span>
-                </div>
-                <h2 class="text-xl font-bold">PAIT</h2>
-                <p class="text-xs opacity-70">Panel Administrador</p>
+<div class="offcanvas-lg offcanvas-start sidebar position-fixed border-0" tabindex="-1" id="sidebarOffcanvas">
+    <div class="d-flex flex-column h-100 p-3">
+        <div class="py-5 text-center">
+            <div
+                class="bg-white/20 rounded-circle w-16 h-16 mx-auto mb-3 flex items-center justify-content-center border-2 border-white/50">
+                <span class="text-white fw-bold text-2xl">A</span>
             </div>
+            <h4 class="text-white fw-bold">AlliApp <small class="d-block text-xs opacity-75">Panel Admin</small></h4>
+        </div>
 
-            <nav class="mt-8 flex-grow">
-                <a href="{{ url_for('dashboard_admin') }}" class="sidebar-item flex items-center px-8 py-3 text-sm transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    Inicio
-                </a>
-                <a href="{{ url_for('vista_mentores')}}" class="sidebar-item flex items-center px-8 py-3 text-sm transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 15.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 01-12 0v1z"></path></svg>
-                    Mentores
-                </a>
-                <a href="#" class="sidebar-item flex items-center px-8 py-3 text-sm transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    Proyectos
-                </a>
-                <a href="#" class="sidebar-item flex items-center px-8 py-3 text-sm transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    Configuración
-                </a>
-            </nav>
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li><a href="{{ url_for('dashboard_admin') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-chart-line me-3"></i> Inicio</a></li>
+            <li><a href="{{ url_for('acciones_admin') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-gears me-3"></i> Acciones</a></li>
+            <li><a href="{{ url_for('vista_mentores') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-user-tie me-3"></i> Mentores</a></li>
+        </ul>
 
-            <div class="p-8 border-t border-green-800">
-                <a href="{{ url_for('signout') }}" class="sidebar-item flex items-center py-2 text-sm opacity-80 hover:opacity-100">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    Salir
-                </a>
-            </div>
-        </aside>
-
-        <main class="flex-1 main-gradient overflow-y-auto p-4 md:p-12">
-            
-            <header class="mb-10">
-                <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    Administrador de Sistema
-                </span>
-                <h1 class="text-4xl font-bold text-gray-800 mt-2">Bienvenido, {{ session.get('nombre').split()[0] }}.</h1>
-                <p class="text-gray-600 mt-1">Gestione usuarios, mentores y proyectos asignados.</p>
-            </header>
-
-            <div class="bg-white rounded-[40px] shadow-sm p-10 md:p-20 text-center flex flex-col items-center justify-center">
-                
-                <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mb-6 text-green-500">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </div>
-
-                <h3 class="text-2xl font-bold text-gray-800 mb-2">Resumen de Actividad</h3>
-                <p class="text-gray-500 max-w-md mx-auto mb-8">
-                    Actualmente no hay alertas críticas. El sistema está funcionando correctamente y todos los módulos están en línea.
-                </p>
-
-                <button class="bg-[#10b981] hover:bg-[#059669] text-white font-bold py-3 px-8 rounded-full transition-all shadow-md active:scale-95">
-                    Ver Reporte General
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white">
-                    <p class="text-sm text-gray-500 font-semibold">Usuarios Totales</p>
-                    <p class="text-3xl font-black text-gray-800">1,284</p>
-                </div>
-                <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white">
-                    <p class="text-sm text-gray-500 font-semibold">Proyectos Activos</p>
-                    <p class="text-3xl font-black text-gray-800">42</p>
-                </div>
-                <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white">
-                    <p class="text-sm text-gray-500 font-semibold">Pendientes</p>
-                    <p class="text-3xl font-black text-green-600">0</p>
-                </div>
-            </div>
-
-        </main>
+        <div class="p-3">
+            <a href="{{ url_for('signout') }}" class="nav-link text-white opacity-70"><i
+                    class="fa-solid fa-right-from-bracket me-3"></i> Salir</a>
+        </div>
     </div>
+</div>
+
+<main class="main-content p-4 p-md-5">
+    <header class="mb-10">
+        <span
+            class="badge bg-indigo-100 text-indigo-700 px-3 py-2 rounded-pill mb-3 font-bold text-xs uppercase">Administrador
+            General</span>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Bienvenido, {{ session.get('nombre').split()[0] }}</h1>
+        <p class="text-gray-600 font-medium">Control total del sistema PAIT.</p>
+    </header>
+
+    <div class="container-fluid px-0">
+        <div class="row g-4">
+            <div class="col-12 col-md-6 col-xl-4">
+                <a href="{{ url_for('acciones_admin') }}" class="text-decoration-none">
+                    <div class="card custom-card h-100 p-4 transition hover:scale-105"
+                        style="border-left: 5px solid #4f46e5;">
+                        <div class="card-body d-flex align-items-center p-0">
+                            <div class="icon-container me-4 icon-admin"><i class="fa-solid fa-screwdriver-wrench"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800 mb-1">Acciones</h3>
+                                <p class="text-sm text-gray-500 mb-0">Gestionar anuncios y mentores.</p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white shadow-sm">
+                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Usuarios</p>
+                <p class="text-3xl font-black text-indigo-900">1,284</p>
+            </div>
+            <div class="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-white shadow-sm">
+                <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Equipos</p>
+                <p class="text-3xl font-black text-indigo-900">42</p>
+            </div>
+        </div>
+    </div>
+</main>
 {% endblock %}

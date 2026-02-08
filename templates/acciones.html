@@ -1,0 +1,313 @@
+{% extends 'layout.html' %}
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
+<style>
+    /* Control de capas y dimensiones del modal */
+    .modal-content {
+        max-height: 92vh;
+        overflow: hidden;
+    }
+
+    .modal-body {
+        overflow-y: auto;
+    }
+
+    /* Z-index estratégico para evitar bloqueos del backdrop */
+    .modal {
+        z-index: 1070 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 1060 !important;
+    }
+
+    .toast-container {
+        z-index: 1080 !important;
+    }
+
+    /* Estilo de la paginación de Bootstrap */
+    .pagination .page-item .page-link {
+        color: #4f46e5;
+        border-radius: 10px;
+        margin: 0 3px;
+        font-weight: bold;
+        border: none;
+        background: #f8fafc;
+        transition: all 0.2s;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #4f46e5 !important;
+        color: white !important;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+    }
+
+    /* Indicador visual para anuncios fijados */
+    .anuncio-item-admin {
+        border-left: 5px solid transparent;
+    }
+
+    .anuncio-item-admin.fijado {
+        border-left-color: #fbbf24;
+        background-color: #fffbeb !important;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3 toast-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="toast show align-items-center text-white bg-{{ 'success' if category == 'success' else 'primary' if category == 'info' else 'danger' }} border-0 rounded-4 shadow-lg mb-2"
+        role="alert">
+        <div class="d-flex">
+            <div class="toast-body font-bold"><i class="fa-solid fa-circle-check me-2"></i> {{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-12">
+        <div>
+            <h1 class="text-4xl font-black text-gray-800 tracking-tight">Panel de Acciones</h1>
+            <p class="text-gray-500 font-medium">Administración de la plataforma AlliApp</p>
+        </div>
+        <a href="{{ url_for('dashboard_admin') }}"
+            class="btn btn-outline-secondary rounded-pill px-5 font-bold border-2">
+            <i class="fa-solid fa-arrow-left me-2"></i> Volver
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-[40px] p-5 h-100 transition hover:shadow-xl hover:scale-[1.02] bg-white"
+                data-bs-toggle="modal" data-bs-target="#modalAnuncioGeneral" style="cursor: pointer;">
+                <div class="d-flex align-items-center">
+                    <div
+                        class="bg-indigo-100 text-indigo-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-gray-800 text-2xl mb-1">Anuncios</h4>
+                        <p class="text-sm text-gray-400 font-medium">Gestionar comunicados globales del sistema.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <a href="{{ url_for('vista_mentores') }}" class="text-decoration-none">
+                <div
+                    class="card border-0 shadow-sm rounded-[40px] p-5 h-100 transition hover:shadow-xl hover:scale-[1.02] bg-white">
+                    <div class="d-flex align-items-center">
+                        <div
+                            class="bg-emerald-100 text-emerald-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-gray-800 text-2xl mb-1">Asignar Mentor</h4>
+                            <p class="text-sm text-gray-400 font-medium">Vincular asesores a los equipos PAIT.</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAnuncioGeneral" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-[50px] border-0 shadow-2xl">
+            <div class="modal-header border-0 p-5 pb-0">
+                <h5 class="text-3xl font-black text-gray-800">Gestionar Anuncios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-5">
+
+                <form action="{{ url_for('publicar_anuncio_general') }}" method="POST" class="mb-4 pb-3 border-bottom">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="d-flex gap-3">
+                        <textarea name="contenido" class="form-control border-0 bg-gray-50 rounded-3xl p-4 font-medium"
+                            rows="2" placeholder="Nuevo comunicado global..." required></textarea>
+                        <button type="submit" class="btn btn-primary px-4 bg-indigo-600 border-0 rounded-3xl shadow-lg">
+                            <i class="fa-solid fa-paper-plane text-xl"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mb-4">
+                    <div class="input-group bg-gray-100 rounded-pill px-3 py-1 border">
+                        <span class="input-group-text bg-transparent border-0 text-gray-400"><i
+                                class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="adminSearchInput"
+                            class="form-control bg-transparent border-0 text-sm font-bold"
+                            placeholder="Filtrar por palabra clave...">
+                    </div>
+                </div>
+
+                <div id="adminAnnouncementList" class="space-y-3">
+                    {% for anuncio in anuncios %}
+                    <div class="p-4 bg-gray-50 rounded-3xl d-flex justify-content-between align-items-center admin-page-item anuncio-item-admin {{ 'fijado' if anuncio[3] }}"
+                        style="display: none;" data-content="{{ anuncio[1].lower() }}">
+                        <div class="flex-grow-1 me-4">
+                            <p class="text-sm mb-1 font-bold text-gray-700 announcement-text">
+                                {% if anuncio[3] %}<i class="fa-solid fa-thumbtack text-warning me-2"></i>{% endif %}
+                                {{ anuncio[1] }}
+                            </p>
+                            <span class="text-[10px] text-gray-400 font-black uppercase">{{ anuncio[2] }}</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-white shadow-sm rounded-circle text-primary border-0 w-10 h-10"
+                                data-bs-toggle="modal" data-bs-target="#modalEditar{{ anuncio[0] }}"><i
+                                    class="fa-solid fa-pen"></i></button>
+                            <button
+                                class="btn btn-white shadow-sm rounded-circle {{ 'text-warning' if anuncio[3] else 'text-gray-300' }} border-0 w-10 h-10"
+                                data-bs-toggle="modal" data-bs-target="#modalFijar{{ anuncio[0] }}"><i
+                                    class="fa-solid fa-thumbtack"></i></button>
+                            <button class="btn btn-white shadow-sm rounded-circle text-danger border-0 w-10 h-10"
+                                data-bs-toggle="modal" data-bs-target="#modalEliminar{{ anuncio[0] }}"><i
+                                    class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <nav class="mt-5">
+                    <ul class="pagination pagination-sm justify-content-center mb-0" id="adminPagination"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for anuncio in anuncios %}
+<div class="modal fade" id="modalEliminar{{ anuncio[0] }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <div class="modal-body p-5 text-center">
+                <div class="text-danger mb-4"><i class="fa-solid fa-circle-exclamation fa-3x"></i></div>
+                <h6 class="font-black text-lg">¿Borrar anuncio?</h6>
+                <div class="d-flex gap-2 mt-4">
+                    <button class="btn btn-light flex-grow-1 rounded-pill font-bold" data-bs-dismiss="modal">No</button>
+                    <form action="{{ url_for('eliminar_anuncio', id_anuncio=anuncio[0]) }}" method="POST"
+                        class="flex-grow-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger w-100 rounded-pill font-bold shadow-sm">Sí,
+                            borrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFijar{{ anuncio[0] }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <div class="modal-body p-5 text-center">
+                <div class="text-warning mb-4"><i class="fa-solid fa-thumbtack fa-3x"></i></div>
+                <h6 class="font-black text-lg">Prioridad</h6>
+                <p class="text-xs text-gray-500 mb-5">¿Deseas cambiar el estado de fijación para este anuncio?</p>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-light flex-grow-1 rounded-pill font-bold" data-bs-dismiss="modal">No</button>
+                    <a href="{{ url_for('fijar_anuncio', id_anuncio=anuncio[0]) }}"
+                        class="btn btn-warning text-white flex-grow-1 rounded-pill font-bold shadow-sm">Confirmar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditar{{ anuncio[0] }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <form action="{{ url_for('editar_anuncio_general', id_anuncio=anuncio[0]) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body p-5">
+                    <h5 class="font-black text-gray-800 mb-4 text-xl">Editar Anuncio</h5>
+                    <textarea name="contenido" class="form-control bg-gray-50 border-0 rounded-3xl p-4 mb-4 font-medium"
+                        rows="4" required>{{ anuncio[1] }}</textarea>
+                    <div class="d-flex gap-3">
+                        <button type="button" class="btn btn-light flex-grow-1 rounded-2xl font-black py-3 shadow-sm"
+                            data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit"
+                            class="btn btn-primary flex-grow-1 rounded-2xl font-black py-3 bg-indigo-600 border-0 shadow-lg">Guardar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const itemsPerPage = 5;
+        const searchInput = document.getElementById('adminSearchInput');
+        const listContainer = document.getElementById('adminAnnouncementList');
+        const allItems = Array.from(listContainer.getElementsByClassName('admin-page-item'));
+        const paginationUl = document.getElementById('adminPagination');
+
+        let filteredItems = allItems;
+        let currentPage = 1;
+
+        function updateDisplay() {
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = Math.max(1, totalPages);
+
+            allItems.forEach(item => item.style.setProperty('display', 'none', 'important'));
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+
+            filteredItems.slice(start, end).forEach(item => {
+                item.style.setProperty('display', 'flex', 'important');
+            });
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            paginationUl.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link shadow-sm" href="#">${i}</a>`;
+                li.onclick = (e) => {
+                    e.preventDefault();
+                    currentPage = i;
+                    updateDisplay();
+                };
+                paginationUl.appendChild(li);
+            }
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            filteredItems = allItems.filter(item => item.getAttribute('data-content').includes(term));
+            currentPage = 1;
+            updateDisplay();
+        });
+
+        updateDisplay();
+
+        // Inicializar Toasts
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+        var toastList = toastElList.map(function (toastEl) {
+            return new bootstrap.Toast(toastEl, { delay: 4000 }).show();
+        });
+    });
+</script>
+
+{% endblock %}

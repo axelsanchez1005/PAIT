@@ -120,22 +120,69 @@
         <div class="bg-white p-6 p-md-10 rounded-[40px] shadow-sm border border-gray-100">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-xl font-bold text-gray-700">Anuncios</h2>
-                <button class="btn-alli shadow-sm">Ver todo</button>
+                <button class="btn-alli shadow-sm" data-bs-toggle="modal" data-bs-target="#modalVerAnuncios">Ver
+                    todo</button>
             </div>
 
             <div class="space-y-4">
-                <div class="flex items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-50 text-[#8fb7ce] me-4">
-                        <i class="fa-solid fa-bullhorn"></i>
+                {% for anuncio in anuncios_principales %}
+                <div class="flex items-center p-4 rounded-2xl border transition-all anuncio-item hover:bg-gray-100"
+                    onclick="abrirDetalle('{{ anuncio[0] }}', this)" style="cursor: pointer; position: relative;"
+                    data-leido="{{ anuncio[7] }}" data-bs-toggle="modal" data-bs-target="#modalDetalle{{ anuncio[0] }}">
+
+                    {% if anuncio[7] == 0 %}
+                    <span class="position-absolute top-2 start-2 p-1 bg-primary border border-light rounded-circle"
+                        id="dot-{{ anuncio[0] }}"></span>
+                    {% endif %}
+
+                    <div
+                        class="w-12 h-12 rounded-xl flex items-center justify-center {{ 'bg-indigo-600 text-white shadow-sm' if anuncio[3] else 'bg-blue-50 text-[#8fb7ce]' }} me-4">
+                        <i class="fa-solid {{ 'fa-thumbtack' if anuncio[3] else 'fa-bullhorn' }}"></i>
                     </div>
-                    <div>
-                        <p class="font-bold text-gray-800 mb-0 text-sm">Próximamente: Registro de proyectos finales</p>
-                        <span class="text-xs text-gray-400">Hace unos momentos</span>
+                    <div class="flex-grow-1">
+                        <p class="font-bold text-gray-800 mb-0 text-sm truncate w-64">{{ anuncio[1] }}</p>
+                        <span class="text-xs text-gray-400">{{ anuncio[4] }} • {{ 'Global' if not anuncio[5] else
+                            'Equipo' }}</span>
                     </div>
                 </div>
+                {% endfor %}
             </div>
+
+            <script>
+                function marcarLeido(idAnuncio, elemento) {
+                    if (elemento.getAttribute('data-leido') === '1') return;
+
+                    fetch(`/marcar_leido/${idAnuncio}`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+                    }).then(response => {
+                        if (response.ok) {
+                            const dot = document.getElementById(`dot-${idAnuncio}`);
+                            if (dot) dot.remove();
+                            elemento.setAttribute('data-leido', '1');
+                        }
+                    });
+                }
+
+                function abrirDetalle(idAnuncio, elemento) {
+                    // Si no ha sido leído, mandamos la petición al servidor
+                    if (elemento.getAttribute('data-leido') === '0') {
+                        fetch(`/marcar_leido/${idAnuncio}`, {
+                            method: 'POST',
+                            headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+                        }).then(response => {
+                            if (response.ok) {
+                                const dot = document.getElementById(`dot-${idAnuncio}`);
+                                if (dot) dot.remove();
+                                elemento.setAttribute('data-leido', '1');
+                            }
+                        });
+                    }
+                }
+            </script>
         </div>
     </div>
+
 </main>
 
 {% if not session.get('datos_completos') %}
@@ -268,5 +315,66 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalVerAnuncios" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header bg-light border-0 p-4">
+                <h5 class="font-bold mb-0">Historial de Anuncios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="space-y-4">
+                    {% for anuncio in todos_los_anuncios %}
+                    <div class="p-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span
+                                class="badge {{ 'bg-indigo-100 text-indigo-700' if anuncio[6] == 'A' else 'bg-green-100 text-green-700' }} text-[10px] px-2 py-1 rounded-pill uppercase">
+                                {{ 'Administración' if anuncio[6] == 'A' else 'Equipo' }}
+                            </span>
+                            <small class="text-gray-400 text-[10px]">{{ anuncio[2] }}</small>
+                        </div>
+                        <p class="text-sm text-gray-800 mb-1 font-medium">{{ anuncio[1] }}</p>
+                        <p class="text-[11px] text-gray-500 italic mb-0">Publicado por: {{ anuncio[4] }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for anuncio in anuncios_principales %}
+<div class="modal fade" id="modalDetalle{{ anuncio[0] }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 p-4 pb-0">
+                <span
+                    class="badge {{ 'bg-indigo-100 text-indigo-700' if anuncio[6] == 'A' else 'bg-green-100 text-green-700' }} rounded-pill uppercase text-[10px] px-3">
+                    {{ 'Administración' if anuncio[6] == 'A' else 'Equipo' }}
+                </span>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <h5 class="font-bold text-gray-800 mb-3">Comunicado</h5>
+                <p class="text-gray-600 leading-relaxed">{{ anuncio[1] }}</p>
+
+                <hr class="my-4 opacity-50">
+
+                <div class="d-flex align-items-center">
+                    <div
+                        class="bg-gray-100 rounded-circle w-10 h-10 flex items-center justify-center font-bold text-gray-500 me-3">
+                        {{ anuncio[4][0] }}
+                    </div>
+                    <div>
+                        <p class="mb-0 text-sm font-bold text-gray-800">{{ anuncio[4] }}</p>
+                        <p class="mb-0 text-[10px] text-gray-400">{{ anuncio[2] }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 {% endblock %}

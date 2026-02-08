@@ -65,10 +65,10 @@ class ModelUser:
             return False
 
     @classmethod
-    def obtener_disponibles(cls, db, carrera=None, grado=None, id_excluir=None):
+    def obtener_disponibles(cls, db, carrera=None, grado=None, id_excluir=None, nombre=None):
         try:
             cursor = db.connection.cursor()
-            # Consulta base: Alumnos (rol 'U') que no están en la tabla miembros_equipo
+            # 1. Consulta base: Alumnos (rol 'U') que NO están en ningún equipo
             sql = """
                 SELECT id, codigo, nombre, correo, celular, carrera, grado, presentacion 
                 FROM usuarios 
@@ -77,15 +77,22 @@ class ModelUser:
             """
             params = []
 
-            # Filtros dinámicos
+            # 2. FILTRO POR NOMBRE (Búsqueda parcial e insensible a mayúsculas/minúsculas)
+            if nombre and nombre.strip():
+                sql += " AND nombre LIKE %s"
+                params.append(f"%{nombre}%")
+
+            # 3. FILTRO POR CARRERA
             if carrera:
                 sql += " AND carrera = %s"
                 params.append(carrera)
+            
+            # 4. FILTRO POR SEMESTRE (GRADO)
             if grado:
                 sql += " AND grado = %s"
                 params.append(grado)
             
-            # Evitar que el emisor se vea a sí mismo (por si acaso)
+            # 5. EXCLUIR AL EMISOR (Seguridad)
             if id_excluir:
                 sql += " AND id != %s"
                 params.append(id_excluir)
@@ -95,13 +102,14 @@ class ModelUser:
             
             alumnos = []
             for r in rows:
-                # Usamos la entidad User (id, codigo, nombre, password, rol, correo, celular)
-                # Agregamos la presentación/bio como atributo extra si tu entidad lo permite
+                # Mapeo a la entidad User
                 u = User(r[0], r[1], r[2], None, 'U', r[3], r[4])
                 u.carrera = r[5]
                 u.grado = r[6]
                 u.presentacion = r[7]
                 alumnos.append(u)
+                
             return alumnos
         except Exception as ex:
+            print(f"Error en obtener_disponibles: {ex}")
             raise Exception(ex)

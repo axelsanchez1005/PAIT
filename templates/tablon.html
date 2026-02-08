@@ -2,166 +2,360 @@
 {% block head_css %}
 <link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
 <style>
-    .nav-tabs .nav-link { color: #5f6368; font-weight: 500; border: none; }
-    .nav-tabs .nav-link.active { color: #272525 !important; border-bottom: 3px solid #1b1b1b !important; }
-    .banner-equipo { background: linear-gradient(135deg, #8fb7ce, #5c6bc0); border-radius: 12px; padding: 40px; color: white; }
-    .avatar-circle { width: 40px; height: 40px; background-color: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; }
+    /* Estética moderna con bordes extra redondeados para AlliApp */
+    .nav-tabs .nav-link {
+        color: #64748b;
+        font-weight: 700;
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #1e293b !important;
+        border-bottom: 4px solid #4f46e5 !important;
+    }
+
+    .banner-equipo {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border-radius: 35px;
+        padding: 60px 40px;
+        color: white;
+        box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.2);
+    }
+
+    .avatar-circle {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        font-weight: 900;
+    }
+
+    .mentor-card {
+        background-color: #f0fdf4;
+        border: 2px solid #dcfce7;
+        border-radius: 25px;
+        transition: transform 0.2s;
+    }
+
+    .mentor-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .section-label {
+        font-size: 0.7rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #94a3b8;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
 </style>
 {% endblock %}
 
 {% block contenido %}
-
 <script src="https://cdn.tailwindcss.com"></script>
 
-<div class="container py-4">
-    <div class="banner-equipo shadow-sm mb-4 position-relative">
-        <h1 class="display-5 font-bold">{{ equipo.nombre }}</h1>
-        <p class="lead opacity-90">{{ equipo.idea }}</p>
-        <div class="position-absolute bottom-4 right-4">
-            <span class="badge bg-white text-primary rounded-pill px-3">{{ total_miembros }}/5 Miembros</span>
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <a href="{{ url_for('dashboard_mentor' if session.get('rol') == 'M' else 'dashboard_alumno') }}"
+            class="btn btn-outline-secondary rounded-pill px-5 font-black border-2 hover:bg-gray-50 transition">
+            <i class="fa-solid fa-arrow-left-long me-2"></i> Salir al Panel
+        </a>
+        <div class="flex items-center gap-3">
+            <span
+                class="badge {{ 'bg-emerald-100 text-emerald-700' if session.get('rol') == 'M' else 'bg-indigo-100 text-indigo-700' }} rounded-full px-4 py-2 font-black text-[10px] uppercase tracking-widest shadow-sm">
+                {{ 'Modo Mentor' if session.get('rol') == 'M' else 'Modo Alumno' }}
+            </span>
         </div>
     </div>
 
-    <ul class="nav nav-tabs mb-4 justify-content-center border-bottom" id="teamTab" role="tablist">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#inicio">Inicio</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#actividades">Trabajo de clase</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#integrantes">Personas</button></li>
+    <div class="banner-equipo mb-12 position-relative overflow-hidden">
+        <div class="position-relative z-10">
+            <h1 class="text-5xl font-black tracking-tighter mb-3">{{ equipo.nombre }}</h1>
+            <p class="text-xl opacity-80 font-medium italic mb-0">"{{ equipo.idea }}"</p>
+        </div>
+        <div class="position-absolute bottom-8 right-10">
+            <div
+                class="bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl px-6 py-3 flex items-center gap-3">
+                <i class="fa-solid fa-user-group text-2xl"></i>
+                <span class="text-lg font-black">{{ total_miembros }}/5 Alumnos</span>
+            </div>
+        </div>
+        <div class="position-absolute top-[-20%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <ul class="nav nav-tabs mb-10 justify-content-center gap-5 border-0" id="teamTab" role="tablist">
+        <li class="nav-item"><button class="nav-link active text-lg px-4" data-bs-toggle="tab"
+                data-bs-target="#inicio">Tablón</button></li>
+        <li class="nav-item"><button class="nav-link text-lg px-4" data-bs-toggle="tab"
+                data-bs-target="#actividades">Trabajo de clase</button></li>
+        <li class="nav-item"><button class="nav-link text-lg px-4" data-bs-toggle="tab"
+                data-bs-target="#integrantes">Personas</button></li>
     </ul>
 
     <div class="tab-content" id="teamTabContent">
+
         <div class="tab-pane fade show active" id="inicio">
-            <div class="row">
+            <div class="row g-5">
                 <div class="col-md-3">
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-body">
-                            <h6 class="text-xs font-bold text-gray-400 uppercase mb-3">Comunicación</h6>
-                            {% if equipo.link_whatsapp %}
-                                <a href="{{ equipo.link_whatsapp }}" target="_blank" class="btn btn-success w-100 rounded-3 py-2 mb-2">
-                                    <i class="fa-brands fa-whatsapp me-2"></i> WhatsApp
-                                </a>
-                                {% if es_lider or es_mentor %}
-                                    <button class="btn btn-link text-xs w-100 text-gray-400 decoration-none" data-bs-toggle="modal" data-bs-target="#modalLinkWA">Editar link</button>
-                                {% endif %}
-                            {% elif es_lider or es_mentor %}
-                                <button class="btn btn-outline-primary w-100 rounded-3 py-2 text-sm" data-bs-toggle="modal" data-bs-target="#modalLinkWA">
-                                    <i class="fa-solid fa-link me-2"></i> Añadir Link
-                                </button>
-                            {% else %}
-                                <p class="text-xs text-gray-400 italic text-center">Sin link de contacto aún.</p>
-                            {% endif %}
-
-                            </a>
-                        </div>
+                    <div class="card border-0 shadow-sm rounded-[35px] p-5 mb-5 bg-white">
+                        <span class="section-label">Canal Oficial</span>
+                        {% if equipo.link_whatsapp %}
+                        <a href="{{ equipo.link_whatsapp }}" target="_blank"
+                            class="btn btn-success w-100 rounded-2xl py-3 font-black mb-3 shadow-lg shadow-emerald-100 bg-emerald-500 border-0 transition hover:scale-105">
+                            <i class="fa-brands fa-whatsapp me-2 text-xl"></i> WhatsApp
+                        </a>
+                        {% if es_lider or es_mentor %}
+                        <button
+                            class="btn btn-link text-[10px] w-100 text-gray-400 font-bold decoration-none uppercase tracking-tighter"
+                            data-bs-toggle="modal" data-bs-target="#modalLinkWA">Cambiar Enlace</button>
+                        {% endif %}
+                        {% elif es_lider or es_mentor %}
+                        <button class="btn btn-outline-primary w-100 rounded-2xl py-3 border-2 font-black"
+                            data-bs-toggle="modal" data-bs-target="#modalLinkWA">
+                            <i class="fa-solid fa-link me-2"></i> Añadir Link
+                        </button>
+                        {% else %}
+                        <p class="text-center text-gray-400 italic text-sm py-4">Sin chat activo.</p>
+                        {% endif %}
                     </div>
 
-                    {% if (es_lider or es_mentor) and total_miembros < 5 %}
-                    <div class="card border-0 shadow-sm rounded-4 bg-primary text-white mb-4">
-                        <div class="card-body text-center">
-                            <p class="text-xs mb-2">¿Falla alguien?</p>
-                            <a href="{{ url_for('buscar_alumnos') }}" class="btn btn-light btn-sm w-100 font-bold">Invitar Alumnos</a>
-                        </div>
-                    </div>
-                    {% endif %}
+                    {% if (es_lider or es_mentor) and total_miembros < 5 %} <div
+                        class="card border-0 shadow-lg rounded-[35px] p-5 bg-indigo-600 text-white">
+                        <h6 class="font-black text-sm mb-3 uppercase tracking-widest">Cupos Libres</h6>
+                        <p class="text-xs font-medium opacity-80 mb-5">El equipo aún no está completo. Puedes invitar a
+                            más compañeros de la carrera.</p>
+                        <a href="{{ url_for('buscar_alumnos') }}"
+                            class="btn btn-white w-100 rounded-2xl font-black text-indigo-600 py-3 border-0 bg-white">Invitar</a>
                 </div>
+                {% endif %}
+            </div>
 
-                <div class="col-md-9">
-                    {% if es_mentor %}
-                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                        <form action="{{ url_for('publicar_anuncio', id_equipo=equipo.id) }}" method="POST">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="bg-primary text-white rounded-circle w-10 h-10 flex items-center justify-center font-bold">
-                                    {{ session['nombre'][0] }}
-                                </div>
-                                <textarea name="contenido" class="form-control border-0 bg-gray-50 rounded-3" placeholder="Anuncia algo a tu equipo..." rows="1" required></textarea>
-                                <button type="submit" class="btn btn-primary rounded-circle"><i class="fa-solid fa-paper-plane"></i></button>
-                            </div>
-                        </form>
-                    </div>
-                    {% endif %}
-
-                    <div class="card border-0 shadow-sm rounded-4 p-4">
-                        <div class="d-flex align-items-center mb-4 text-gray-400 border-bottom pb-3">
-                            <div class="bg-light rounded-circle p-2 me-3"><i class="fa-solid fa-bullhorn"></i></div>
-                            <span class="text-sm font-bold">Novedades</span>
+            <div class="col-md-9">
+                {% if es_mentor %}
+                <div class="card border-0 shadow-sm rounded-[35px] p-4 mb-10 bg-white">
+                    <form action="{{ url_for('publicar_anuncio', id_equipo=equipo.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="d-flex align-items-center gap-4">
+                            <div
+                                class="bg-emerald-100 text-emerald-600 rounded-2xl w-14 h-14 flex items-center justify-content-center font-black text-2xl shadow-inner">
+                                M</div>
+                            <textarea name="contenido"
+                                class="form-control border-0 bg-gray-50 rounded-2xl p-4 font-bold text-sm"
+                                placeholder="Anuncia algo al equipo..." rows="1" required></textarea>
+                            <button type="submit"
+                                class="btn btn-primary rounded-2xl w-14 h-14 flex items-center justify-content-center bg-indigo-600 border-0 shadow-xl shadow-indigo-100 transition hover:bg-indigo-700">
+                                <i class="fa-solid fa-paper-plane text-xl"></i>
+                            </button>
                         </div>
-                        
+                    </form>
+                </div>
+                {% endif %}
+
+                <div class="card border-0 shadow-sm rounded-[45px] p-8 bg-white">
+                    <div class="flex items-center gap-3 mb-8 px-2">
+                        <div
+                            class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-bullhorn"></i>
+                        </div>
+                        <h4 class="text-2xl font-black text-gray-800">Actualizaciones</h4>
+                    </div>
+
+                    <div class="space-y-6">
                         {% for anuncio in anuncios %}
-                        <div class="d-flex gap-3 mb-4">
-                            <div class="avatar-circle bg-gray-200 text-gray-600">M</div>
-                            <div class="bg-gray-50 p-3 rounded-4 flex-grow-1">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="font-bold text-sm">{{ anuncio[2] }} (Mentor)</span>
-                                    <span class="text-xs text-gray-400">{{ anuncio[1] }}</span>
+                        <div
+                            class="p-5 rounded-[30px] border border-gray-100 flex gap-5 hover:bg-gray-50 transition group">
+                            <div
+                                class="avatar-circle {{ 'bg-indigo-100 text-indigo-600' if anuncio[5] == 'A' else 'bg-emerald-100 text-emerald-600' }}">
+                                {{ 'A' if anuncio[5] == 'A' else 'M' }}
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-black text-gray-800">{{ anuncio[3] }} <small
+                                            class="ms-3 text-[9px] font-black uppercase tracking-widest text-gray-400">{{
+                                            'Admin' if anuncio[5] == 'A' else 'Mentor' }}</small></span>
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase">{{ anuncio[2] }}</span>
                                 </div>
-                                <p class="text-sm mb-0">{{ anuncio[0] }}</p>
+                                <p class="text-gray-600 font-medium text-sm leading-relaxed mb-0">{{ anuncio[1] }}</p>
                             </div>
                         </div>
                         {% else %}
-                        <div class="text-center py-5">
-                            <img src="{{ url_for('static', filename='img/empty_announcement.svg') }}" class="w-32 mx-auto mb-3 opacity-20">
-                            <p class="text-gray-400">Aquí aparecerán los avisos de tu mentor.</p>
+                        <div class="text-center py-20 opacity-20">
+                            <i class="fa-solid fa-inbox text-7xl mb-4"></i>
+                            <p class="font-black italic">Aún no hay anuncios en este tablón.</p>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="tab-pane fade" id="actividades">
-            <div class="max-w-3xl mx-auto py-5">
-                <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
-                    <i class="fa-solid fa-list-check text-4xl text-gray-200 mb-4"></i>
-                    <h5 class="text-gray-600 font-bold">Trabajos de Clase</h5>
-                    <p class="text-gray-400 text-sm">El mentor aún no ha asignado actividades.</p>
+    <div class="tab-pane fade" id="integrantes">
+        <div class="max-w-4xl mx-auto py-5">
+
+            <span class="section-label">Asesor Académico</span>
+            {% if mentor_obj %}
+            <div class="mentor-card p-5 mb-12 d-flex justify-content-between align-items-center shadow-md">
+                <div class="d-flex align-items-center">
+                    <div class="avatar-circle bg-emerald-600 text-white me-5 shadow-lg shadow-emerald-200 text-2xl">M
+                    </div>
+                    <div>
+                        <p class="mb-0 font-black text-emerald-900 text-2xl tracking-tighter">{{ mentor_obj.nombre }}
+                        </p>
+                        <span class="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-500">Docente a cargo
+                            de la mentoría</span>
+                    </div>
                 </div>
+                <a href="mailto:{{ mentor_obj.correo }}"
+                    class="btn btn-white rounded-circle shadow-sm text-emerald-600 border-0 w-12 h-12 flex items-center justify-content-center bg-white hover:scale-110 transition">
+                    <i class="fa-solid fa-envelope text-xl"></i>
+                </a>
             </div>
-        </div>
+            {% else %}
+            <div class="p-10 border-2 border-dashed border-gray-100 rounded-[35px] text-center mb-12">
+                <p class="text-gray-300 font-bold italic mb-0">El equipo se encuentra en espera de mentor...</p>
+            </div>
+            {% endif %}
 
-        <div class="tab-pane fade" id="integrantes">
-            <div class="max-w-3xl mx-auto py-4">
-                <h5 class="text-primary font-bold border-bottom pb-2 mb-4">Integrantes del Equipo</h5>
-                <div class="list-group list-group-flush">
-                    {% for integrante in integrantes %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 border-bottom bg-transparent">
-                        <div class="d-flex align-items-center" onclick="verPerfil('{{ integrante.id }}')" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalPerfilMiembro">
-                            <div class="avatar-circle me-3">{{ integrante.nombre[0] }}</div>
-                            <div>
-                                <p class="mb-0 font-medium text-gray-800">{{ integrante.nombre }}</p>
-                                <span class="text-xs text-gray-400 uppercase">
-                                    {{ 'Jefe de Equipo' if integrante.id == equipo.id_lider else 'Alumno' }}
-                                </span>
-                            </div>
+            <span class="section-label">Equipo de Trabajo ({{ total_miembros }}/5)</span>
+            <div class="space-y-4">
+                {% for integrante in integrantes %}
+                <div
+                    class="p-5 bg-white rounded-[35px] border border-gray-100 d-flex justify-content-between align-items-center transition hover:shadow-xl hover:border-indigo-100 group">
+                    <div class="d-flex align-items-center">
+                        <div
+                            class="avatar-circle {{ 'bg-indigo-600 shadow-xl shadow-indigo-100 text-white' if integrante.id == equipo.id_lider else 'bg-gray-100 text-gray-400' }} text-xl">
+                            {{ integrante.nombre[0] }}
                         </div>
-                        {% if (es_lider or es_mentor) and integrante.id != session['user_id'] %}
-                            <button class="btn btn-outline-danger btn-sm border-0"><i class="fa-solid fa-user-minus"></i></button>
+                        <div class="ms-5">
+                            <p class="mb-0 font-black text-gray-800 text-lg tracking-tight">{{ integrante.nombre }}</p>
+                            <span
+                                class="text-[10px] font-black uppercase tracking-widest {{ 'text-indigo-600' if integrante.id == equipo.id_lider else 'text-gray-400' }}">
+                                {{ 'Líder de Proyecto' if integrante.id == equipo.id_lider else 'Colaborador' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 px-3">
+                        {% if (es_mentor or es_lider) and integrante.id != equipo.id_lider %}
+                        <form action="{{ url_for('asignar_lider', id_equipo=equipo.id, id_usuario=integrante.id) }}"
+                            method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% if es_mentor %}
+                            <button type="submit"
+                                class="btn btn-white shadow-sm rounded-2xl text-amber-500 border-0 w-12 h-12 flex items-center justify-content-center hover:bg-amber-50"
+                                title="Ascender a Jefe" onclick="return confirm('¿Confirmar cambio de liderazgo?')">
+                                <i class="fa-solid fa-crown text-xl"></i>
+                            </button>
+                            {% else %}
+                            <button type="submit"
+                                class="btn btn-white shadow-sm rounded-2xl text-indigo-500 border-0 w-12 h-12 flex items-center justify-content-center hover:bg-indigo-50"
+                                title="Ceder mi cargo"
+                                onclick="return confirm('¿Seguro que quieres ceder la jefatura? Pasarás a ser colaborador.')">
+                                <i class="fa-solid fa-right-left text-xl"></i>
+                            </button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
+
+                        {% if es_mentor and integrante.id != session['user_id'] %}
+                        <button type="button"
+                            class="btn btn-white shadow-sm rounded-2xl text-red-500 border-0 w-12 h-12 flex items-center justify-content-center hover:bg-red-50"
+                            data-bs-toggle="modal" data-bs-target="#modalEliminar{{ integrante.id }}">
+                            <i class="fa-solid fa-user-minus text-xl"></i>
+                        </button>
                         {% endif %}
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
+                {% for integrante in integrantes %}
+                <div class="modal fade" id="modalEliminar{{ integrante.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+                            <div class="modal-body p-5 text-center">
+                                <div
+                                    class="w-20 h-20 bg-red-50 text-red-500 rounded-[30px] flex items-center justify-content-center mx-auto mb-4 text-3xl">
+                                    <i class="fa-solid fa-user-xmark"></i>
+                                </div>
+                                <h5 class="font-black text-gray-800 mb-2">¿Dar de baja?</h5>
+                                <p class="text-xs text-gray-400 font-bold mb-5 leading-relaxed">
+                                    Estás por eliminar a <span class="text-red-500">{{ integrante.nombre }}</span> de
+                                    este equipo.
+                                    Esta acción es irreversible.
+                                </p>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button"
+                                        class="btn btn-light flex-grow-1 rounded-2xl font-black py-3 shadow-sm"
+                                        data-bs-dismiss="modal">
+                                        Cancelar
+                                    </button>
+                                    <form
+                                        action="{{ url_for('eliminar_miembro', id_equipo=equipo.id, id_usuario=integrante.id) }}"
+                                        method="POST" class="flex-grow-1">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit"
+                                            class="btn btn-danger w-100 rounded-2xl font-black py-3 bg-red-600 border-0 shadow-lg shadow-red-100">
+                                            Confirmar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
+
+    <div class="tab-pane fade" id="actividades">
+        <div class="max-w-3xl mx-auto py-20 text-center">
+            <div
+                class="w-32 h-32 bg-gray-50 rounded-[50px] flex items-center justify-content-center mx-auto mb-8 text-gray-200 text-5xl">
+                <i class="fa-solid fa-folder-tree"></i>
+            </div>
+            <h5 class="text-2xl font-black text-gray-800 mb-4">Módulo de Actividades</h5>
+            <p class="text-gray-400 font-bold mb-10">Aquí se gestionarán los entregables y reportes técnicos del equipo.
+            </p>
+            {% if es_mentor %}
+            <button
+                class="btn btn-primary rounded-full px-8 py-3 font-black bg-indigo-600 border-0 shadow-2xl shadow-indigo-200 transition hover:scale-105">Definir
+                Nueva Tarea</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
 </div>
 
 <div class="modal fade" id="modalLinkWA" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-content rounded-[50px] border-0 shadow-2xl">
             <form action="{{ url_for('actualizar_link', id_equipo=equipo.id) }}" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="modal-header border-0 p-4">
-                    <h5 class="modal-title font-bold">Link de Comunicación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body px-4 pb-4">
-                    <p class="text-xs text-gray-500 mb-3">Ingresa el enlace de WhatsApp o Discord para tu equipo.</p>
-                    <input type="url" name="link_whatsapp" class="form-control rounded-3 py-2" placeholder="https://chat.whatsapp.com/..." value="{{ equipo.link_whatsapp or '' }}" required>
-                </div>
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 font-bold">Guardar Cambios</button>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body p-8">
+                    <h5 class="font-black text-gray-800 text-2xl mb-2 text-center">Enlace de Comunicación</h5>
+                    <p class="text-xs text-center text-gray-400 font-black uppercase tracking-widest mb-8">Canal oficial
+                        del equipo</p>
+                    <input type="url" name="link_whatsapp"
+                        class="form-control rounded-2xl py-4 border-0 bg-gray-50 mb-8 font-bold text-sm text-center"
+                        placeholder="https://chat.whatsapp.com/..." value="{{ equipo.link_whatsapp or '' }}" required>
+                    <div class="d-flex gap-3">
+                        <button type="button" class="btn btn-light flex-grow-1 rounded-2xl font-black py-3"
+                            data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit"
+                            class="btn btn-primary flex-grow-1 rounded-2xl font-black py-3 bg-indigo-600 border-0 shadow-xl shadow-indigo-100">Guardar</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 {% endblock %}

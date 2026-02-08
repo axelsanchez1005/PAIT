@@ -83,11 +83,12 @@ class ModelEquipo:
     @classmethod
     def obtener_miembros(cls, db, id_equipo):
         cursor = db.connection.cursor()
+        # Filtramos por rol 'U' para traer solo alumnos
         sql = """
             SELECT u.id, u.codigo, u.nombre, u.password, u.rol 
             FROM usuarios u
             JOIN miembros_equipo me ON u.id = me.id_usuario
-            WHERE me.id_equipo = %s
+            WHERE me.id_equipo = %s AND u.rol = 'U'
         """
         cursor.execute(sql, [id_equipo])
         rows = cursor.fetchall()
@@ -182,6 +183,7 @@ class ModelEquipo:
             return equipos
         except Exception as ex:
             raise Exception(ex)
+            
     @classmethod
     def asignar_mentor(cls, db, id_equipo, id_mentor):
         try:
@@ -199,3 +201,16 @@ class ModelEquipo:
         except Exception as ex:
             print(f"Error en el modelo: {ex}")
             return False  
+
+@classmethod
+def cambiar_lider(cls, db, id_equipo, id_nuevo_lider):
+    try:
+        cursor = db.connection.cursor()
+        # Solo actualizamos la columna id_lider en la tabla equipos
+        sql = "UPDATE equipos SET id_lider = %s WHERE id = %s"
+        cursor.execute(sql, (id_nuevo_lider, id_equipo))
+        db.connection.commit()
+        return True
+    except Exception as ex:
+        print(f"Error al cambiar líder: {ex}")
+        return False
