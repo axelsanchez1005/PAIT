@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 06-02-2026 a las 03:14:18
+-- Tiempo de generación: 08-02-2026 a las 03:46:33
 -- Versión del servidor: 9.2.0
 -- Versión de PHP: 7.4.9
 
@@ -45,7 +45,37 @@ CREATE TABLE `alumnos` (
 --
 
 INSERT INTO `alumnos` (`codigoAl`, `nombreAl`, `passwordAl`, `carrera`, `grado`, `grupo`, `turno`, `ingreso`, `invitados`, `celularAl`) VALUES
-(222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'polimatute', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05.000000', 0, '3321790000');
+(222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'polimatute', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05.000000', 0, '3321790000'),
+(4, 'TERRANOVA HERNANDEZ DIEGO KALO', 'polimatute', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10.000000', 0, '3321793455');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `anuncios`
+--
+
+CREATE TABLE `anuncios` (
+  `id` int NOT NULL,
+  `id_equipo` int DEFAULT NULL,
+  `id_usuario` int NOT NULL,
+  `contenido` text NOT NULL,
+  `fecha_publicacion` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fijado` tinyint(1) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Volcado de datos para la tabla `anuncios`
+--
+
+INSERT INTO `anuncios` (`id`, `id_equipo`, `id_usuario`, `contenido`, `fecha_publicacion`, `fijado`) VALUES
+(1, 1, 2, 'HOLA GUAPOS', '2026-02-07 21:52:42', 0),
+(4, NULL, 3, 'holaaa\r\nputo', '2026-02-07 23:09:22', 0),
+(6, NULL, 3, 'yiyi', '2026-02-08 01:51:20', 1),
+(7, NULL, 3, 'yy', '2026-02-08 01:55:44', 0),
+(12, NULL, 3, 'h', '2026-02-08 02:27:16', 0),
+(13, NULL, 3, 'o\r\n', '2026-02-08 02:27:20', 0),
+(14, NULL, 3, 'l', '2026-02-08 02:27:32', 0),
+(15, NULL, 3, 'a', '2026-02-08 02:27:37', 0);
 
 -- --------------------------------------------------------
 
@@ -67,7 +97,7 @@ CREATE TABLE `equipos` (
 --
 
 INSERT INTO `equipos` (`id`, `nombre`, `idea`, `id_lider`, `id_mentor`, `link_whatsapp`) VALUES
-(1, 'PAIT - Equipo 1', 'Prueba', 1, NULL, NULL);
+(1, 'PAIT - Equipo 1', 'Prueba', 1, 2, 'https:/wasa');
 
 -- --------------------------------------------------------
 
@@ -83,6 +113,40 @@ CREATE TABLE `invitaciones` (
   `tipo` enum('INVITAR','SOLICITAR') NOT NULL,
   `estado` enum('PENDIENTE','ACEPTADA','RECHAZADA') DEFAULT 'PENDIENTE'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Volcado de datos para la tabla `invitaciones`
+--
+
+INSERT INTO `invitaciones` (`id`, `id_emisor`, `id_receptor`, `id_equipo`, `tipo`, `estado`) VALUES
+(1, 4, 1, 1, 'SOLICITAR', 'PENDIENTE'),
+(2, 1, 4, 1, 'INVITAR', 'PENDIENTE');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `lecturas_anuncios`
+--
+
+CREATE TABLE `lecturas_anuncios` (
+  `id_usuario` int NOT NULL,
+  `id_anuncio` int NOT NULL,
+  `fecha_lectura` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Volcado de datos para la tabla `lecturas_anuncios`
+--
+
+INSERT INTO `lecturas_anuncios` (`id_usuario`, `id_anuncio`, `fecha_lectura`) VALUES
+(1, 1, '2026-02-08 00:20:53'),
+(1, 4, '2026-02-08 00:23:00'),
+(1, 6, '2026-02-08 02:28:16'),
+(1, 14, '2026-02-08 02:28:28'),
+(1, 15, '2026-02-08 02:28:24'),
+(2, 6, '2026-02-08 03:07:28'),
+(2, 14, '2026-02-08 03:07:31'),
+(2, 15, '2026-02-08 03:07:30');
 
 -- --------------------------------------------------------
 
@@ -122,7 +186,8 @@ CREATE TABLE `miembros_equipo` (
 --
 
 INSERT INTO `miembros_equipo` (`id_equipo`, `id_usuario`) VALUES
-(1, 1);
+(1, 1),
+(1, 2);
 
 -- --------------------------------------------------------
 
@@ -135,7 +200,7 @@ CREATE TABLE `usuarios` (
   `codigo` int NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `rol` enum('U','M','A') NOT NULL COMMENT 'U=Alumno, M=Mentor',
+  `rol` enum('U','M','A') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'U=Alumno, M=Mentor',
   `correo` varchar(255) DEFAULT NULL,
   `celular` varchar(20) DEFAULT NULL,
   `carrera` varchar(10) DEFAULT NULL,
@@ -153,12 +218,21 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id`, `codigo`, `nombre`, `password`, `rol`, `correo`, `celular`, `carrera`, `grado`, `grupo`, `turno`, `ingreso`, `invitados`, `presentacion`) VALUES
 (1, 222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'scrypt:32768:8:1$B9ExGPuhbkc4HFHz$b6784a61489a2e22b23b1484d2bf698f9b8f7c38d4a335deb5c1026276ee7f033d97246c35ee5c95603c57f063a1636e58976a086ba27ad528d438eb138347aa', 'U', 'axel.sanchez1005@alumnos.udg.mx', '3321793454', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05', 0, NULL),
-(2, 8903727, 'GONZALES PEÑANIETO JOSE PEPE', 'polomatute', 'M', 'jose.gonzales1044@academicos.udg.mx', '1321780000', NULL, NULL, NULL, NULL, NULL, 0, NULL),
-(3, 222910052, 'juan', 'polimatute', 'A', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL);
+(2, 222910052, 'GONZALES PEÑANIETO JOSE PEPE', 'scrypt:32768:8:1$PeMuo7eQLtxpPiBK$1ecf664cc99552ecace63d7199c7678f601096ebaa8643e3e547f78581e93257e39639e91fd418c473e998753cfee7e7aa25733606d04c71ef23b046b9bf366c', 'M', 'axelgilb2016@gmail.com', '1321780000', NULL, NULL, NULL, NULL, NULL, 0, NULL),
+(3, 222910053, 'PEREZ HERNANDEZ CARLOS TRUJILLO', 'scrypt:32768:8:1$ceRvggj5shwfPfE5$a1980475193318b257ae0c7284a6cafbd7569d31153f2df11f32c7e97f93c05a6eb0abe8a378967cffdfab8d6cb9b55f055757ac657d38fbbc506e1808329bee', 'A', 'correfalso@gmail.com', 'NULL', 'NULL', 0, 'A', 'M', '2026-02-04 15:49:05', 0, 'ADMIN'),
+(4, 222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'scrypt:32768:8:1$sWd7e11XazdZCa0C$648abf88ae78c3e26d1d60edb5f0b867189add4c511e3b5cb3342597cd74e3d14e8802828fd39f2e021b4b48eaa3226e94206002f47721e1a7b57e16a0cf5d6f', 'U', 'correo@gmail.com', '3321793454', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10', 0, 'hoaaa');
 
 --
 -- Índices para tablas volcadas
 --
+
+--
+-- Indices de la tabla `anuncios`
+--
+ALTER TABLE `anuncios`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_equipo` (`id_equipo`),
+  ADD KEY `id_usuario` (`id_usuario`);
 
 --
 -- Indices de la tabla `equipos`
@@ -176,6 +250,13 @@ ALTER TABLE `invitaciones`
   ADD KEY `id_emisor` (`id_emisor`),
   ADD KEY `id_receptor` (`id_receptor`),
   ADD KEY `id_equipo` (`id_equipo`);
+
+--
+-- Indices de la tabla `lecturas_anuncios`
+--
+ALTER TABLE `lecturas_anuncios`
+  ADD PRIMARY KEY (`id_usuario`,`id_anuncio`),
+  ADD KEY `id_anuncio` (`id_anuncio`);
 
 --
 -- Indices de la tabla `mentores`
@@ -201,6 +282,12 @@ ALTER TABLE `usuarios`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `anuncios`
+--
+ALTER TABLE `anuncios`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
 -- AUTO_INCREMENT de la tabla `equipos`
 --
 ALTER TABLE `equipos`
@@ -210,7 +297,7 @@ ALTER TABLE `equipos`
 -- AUTO_INCREMENT de la tabla `invitaciones`
 --
 ALTER TABLE `invitaciones`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `mentores`
@@ -222,11 +309,18 @@ ALTER TABLE `mentores`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `anuncios`
+--
+ALTER TABLE `anuncios`
+  ADD CONSTRAINT `anuncios_ibfk_1` FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `anuncios_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `equipos`
@@ -244,22 +338,19 @@ ALTER TABLE `invitaciones`
   ADD CONSTRAINT `invitaciones_ibfk_3` FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id`);
 
 --
+-- Filtros para la tabla `lecturas_anuncios`
+--
+ALTER TABLE `lecturas_anuncios`
+  ADD CONSTRAINT `lecturas_anuncios_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `lecturas_anuncios_ibfk_2` FOREIGN KEY (`id_anuncio`) REFERENCES `anuncios` (`id`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `miembros_equipo`
 --
 ALTER TABLE `miembros_equipo`
   ADD CONSTRAINT `miembros_equipo_ibfk_1` FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `miembros_equipo_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 COMMIT;
-
-CREATE TABLE anuncios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_equipo INT,
-    id_usuario INT, -- Quién lo publica (Mentor)
-    contenido TEXT,
-    fecha_publicacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_equipo) REFERENCES equipos(id),
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
-);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
