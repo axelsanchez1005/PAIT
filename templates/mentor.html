@@ -1,10 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block head_css %}
-
-<link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
-
-    <style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboardCardsAd.css') }}">
+<style>
     .sidebar {
         background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
     }
@@ -14,13 +12,14 @@
         background: rgba(79, 70, 229, 0.1);
         color: #4f46e5;
     }
-    </style>
+</style>
 {% endblock %}
 
 {% block titulo %}Administrar Mentores{% endblock %}
 
 {% block contenido %}
 
+<script src="https://cdn.tailwindcss.com"></script>
 
 <div class="offcanvas-lg offcanvas-start sidebar position-fixed border-0" tabindex="-1" id="sidebarOffcanvas">
     <div class="d-flex flex-column h-100 p-3">
