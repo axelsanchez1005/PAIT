@@ -1,36 +1,52 @@
 {% extends "layout.html" %}
 {% block head_css %}
-<link rel="stylesheet" href="{{ url_for('static',filename='css/reestablecer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reestablecer.css') }}">
 {% endblock %}
-{% block title %}Restablecer Contraseña{% endblock %}
+
 {% block contenido %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="reset-container shadow-lg d-flex flex-column flex-md-row">
+        
+        <div class="form-section p-4 p-md-5 bg-white">
+            <h2 class="fw-bold mb-3">Nueva Contraseña</h2>
+            <p class="text-muted mb-4 small">Crea una clave segura para proteger tu cuenta.</p>
 
-<div class="reset-card">
-    <div class="form-section">
-        <h2>Restablecer Contraseña</h2>
-        <p class="instruction">Por favor, ingresa tu nueva contraseña a continuación.</p>
+            <form action="{{ url_for('restablecerClave', token=token) }}" method="post" id="resetForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                
+                <div class="mb-3">
+                    <div class="input-group-custom">
+                        <input type="password" id="nueva_clave" name="nueva_clave" class="custom-input" placeholder="Ingresa nueva contraseña" required>
+                        <button type="button" class="toggle-btn" onclick="togglePassword('nueva_clave', this)">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
-        <form action="{{ url_for('restablecerClave', token=token) }}" method="post">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <div class="mb-2">
-                <input type="password" name="nueva_clave" class="form-control" placeholder="Nueva Contraseña" required>
-            </div>
-            <div class="mb-2">
-                <input type="password" name="confirmar_clave" class="form-control" placeholder="Confirmar Contraseña"
-                    required>
-            </div>
+                <div class="mb-3">
+                    <div class="input-group-custom">
+                        <input type="password" id="confirmar_clave" name="confirmar_clave" class="custom-input" placeholder="Confirma tu contraseña" required>
+                        <button type="button" class="toggle-btn" onclick="togglePassword('confirmar_clave', this)">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                    <div id="error-msg" class="error-text">Las contraseñas no coinciden.</div>
+                </div>
 
-            <a href="{{ url_for('index')}}" class="back-link">¿Volver al inicio de sesión?</a>
+                <div class="d-flex flex-column gap-3 mt-4">
+                    <button type="submit" class="btn btn-primary-custom py-2">ACTUALIZAR</button>
+                    <a href="{{ url_for('index') }}" class="back-link text-center">¿Recordaste tu contraseña? Inicia sesión</a>
+                </div>
+            </form>
+        </div>
 
-            <div class="text-center text-md-start">
-                <button type="submit" class="btn btn-reset">GUARDAR</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="side-panel">
-        <h1>¡Listo!</h1>
-        <p>Tu contraseña será actualizada al instante. Ya puedes volver a tus actividades.</p>
+        <div class="info-section p-4 p-md-5 d-flex flex-column justify-content-center align-items-center text-center text-white">
+            <div class="overlay-curve d-none d-md-block"></div>
+            <h1 class="fw-bold z-1">¡Casi listo!</h1>
+            <p class="mt-3 z-1">Una vez actualizada, podrás acceder a todos tus proyectos de inmediato.</p>
+        </div>
     </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/reestablecer.js') }}"></script>
 {% endblock %}

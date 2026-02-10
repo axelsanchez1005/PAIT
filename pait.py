@@ -192,7 +192,7 @@ def enviar_recuperacion():
     # 4. El acto de magia: enviar
     try:
         mail.send(msg)
-        return "¡Correo enviado con éxito!"
+        return render_template('enviodecorreo.html')
     except Exception as e:
         return f"Error al enviar: {str(e)}"
 

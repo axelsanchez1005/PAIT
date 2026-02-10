@@ -1,0 +1,86 @@
+:root {
+--bg-color: #f0f2f5;
+--card-bg: #ffffff;
+--text-main: #333333;
+--text-sec: #666666;
+}
+
+body {
+font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+background: linear-gradient(135deg, #e2e2e2 0%, #c9d6ff 100%);
+margin: 0;
+min-height: 100vh;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.padre {
+display: flex;
+flex-direction: column; 
+align-items: center;
+justify-content: center;
+width: 90%;
+max-width: 900px;
+box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+border-radius: 20px;
+overflow: hidden;
+background: var(--card-bg);
+}
+
+.container {
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 40px;
+text-align: center;
+background-color: var(--card-bg);
+width: 100%;
+box-sizing: border-box;
+}
+
+h1 {
+color: var(--text-main);
+margin: 0 0 10px 0;
+font-size: 1.8rem;
+}
+
+p {
+color: var(--text-sec);
+margin: 0;
+font-size: 1.1rem;
+line-height: 1.5;
+}
+
+.image {
+width: 100%;
+height: 250px;
+background-color: var(--card-bg);
+background-image: url('https://i.postimg.cc/3x3QzSGq/email-sent-rafiki.png');
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+/* responsivo para PCerdas */
+@media (min-width: 700px) {
+    .padre {
+        flex-direction: row;
+        height: 450px;
+    }
+
+    .container {
+        flex: 1; 
+        height: 100%;
+        text-align: left;
+        align-items: flex-start; 
+        padding: 60px;
+    }
+
+    .image {
+        flex: 1; 
+        height: 80%; 
+        margin-right: 20px;
+    }
+}

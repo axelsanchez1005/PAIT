@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/enviodecorreo.css') }}">
+{% endblock %}
+{% block titulo %}Correo Enviado{% endblock %}
+{% block contenido %}
+
+    <div class="padre">
+        <div class="container">
+            <h1>Correo Enviado</h1>
+            <p>Su correo ha sido enviado exitosamente.</p>
+        </div>
+
+        <div class="image"></div>
+    </div>
+
+{% endblock %}
