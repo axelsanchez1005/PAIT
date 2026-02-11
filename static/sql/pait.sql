@@ -46,7 +46,8 @@ CREATE TABLE `alumnos` (
 
 INSERT INTO `alumnos` (`codigoAl`, `nombreAl`, `passwordAl`, `carrera`, `grado`, `grupo`, `turno`, `ingreso`, `invitados`, `celularAl`) VALUES
 (222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'polimatute', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05.000000', 0, '3321790000'),
-(4, 'TERRANOVA HERNANDEZ DIEGO KALO', 'polimatute', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10.000000', 0, '3321793455');
+(222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'polimatute', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10.000000', 0, '3321793455'),
+(222910055, 'PEREZ HERNANDEZ CARLOS TRUJILLO', 'polimatute', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05.000000', 0, '3321793456');
 
 -- --------------------------------------------------------
 
@@ -220,7 +221,8 @@ INSERT INTO `usuarios` (`id`, `codigo`, `nombre`, `password`, `rol`, `correo`, `
 (1, 222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'scrypt:32768:8:1$B9ExGPuhbkc4HFHz$b6784a61489a2e22b23b1484d2bf698f9b8f7c38d4a335deb5c1026276ee7f033d97246c35ee5c95603c57f063a1636e58976a086ba27ad528d438eb138347aa', 'U', 'axel.sanchez1005@alumnos.udg.mx', '3321793454', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05', 0, NULL),
 (2, 222910052, 'GONZALES PEÑANIETO JOSE PEPE', 'scrypt:32768:8:1$PeMuo7eQLtxpPiBK$1ecf664cc99552ecace63d7199c7678f601096ebaa8643e3e547f78581e93257e39639e91fd418c473e998753cfee7e7aa25733606d04c71ef23b046b9bf366c', 'M', 'axelgilb2016@gmail.com', '1321780000', NULL, NULL, NULL, NULL, NULL, 0, NULL),
 (3, 222910053, 'PEREZ HERNANDEZ CARLOS TRUJILLO', 'scrypt:32768:8:1$ceRvggj5shwfPfE5$a1980475193318b257ae0c7284a6cafbd7569d31153f2df11f32c7e97f93c05a6eb0abe8a378967cffdfab8d6cb9b55f055757ac657d38fbbc506e1808329bee', 'A', 'correfalso@gmail.com', 'NULL', 'NULL', 0, 'A', 'M', '2026-02-04 15:49:05', 0, 'ADMIN'),
-(4, 222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'scrypt:32768:8:1$sWd7e11XazdZCa0C$648abf88ae78c3e26d1d60edb5f0b867189add4c511e3b5cb3342597cd74e3d14e8802828fd39f2e021b4b48eaa3226e94206002f47721e1a7b57e16a0cf5d6f', 'U', 'correo@gmail.com', '3321793454', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10', 0, 'hoaaa');
+(4, 222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'scrypt:32768:8:1$sWd7e11XazdZCa0C$648abf88ae78c3e26d1d60edb5f0b867189add4c511e3b5cb3342597cd74e3d14e8802828fd39f2e021b4b48eaa3226e94206002f47721e1a7b57e16a0cf5d6f', 'U', 'correo@gmail.com', '3321793454', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10', 0, 'hoaaa'),
+(5, 222910055, 'PEREZ HERNANDEZ CARLOS TRUJILLO', 'polimatute', 'U', 'carlos.perez1055@alumnos.udg.mx', '3321793455', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05', 0, NULL);
 
 --
 -- Índices para tablas volcadas
@@ -309,7 +311,7 @@ ALTER TABLE `mentores`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restricciones para tablas volcadas

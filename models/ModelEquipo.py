@@ -117,21 +117,28 @@ class ModelEquipo:
 
     @classmethod
     def obtener_invitaciones_usuario(cls, db, id_usuario):
-        cursor = db.connection.cursor()
-        # Traemos invitaciones donde el usuario es el receptor (recibidas) 
-        # o el emisor (enviadas), incluyendo el nombre del equipo y del emisor
+        cur = db.connection.cursor()
+        # Esta consulta trae:
+        # 1. Invitaciones donde YO soy el receptor (alguien me invitó)
+        # 2. Solicitudes donde YO soy el emisor (yo pedí unirme)
         sql = """
-            SELECT i.id, i.tipo, i.estado, e.nombre as nombre_equipo, 
-                   u.nombre as nombre_persona, i.id_emisor, i.id_receptor
+            SELECT 
+                i.id, 
+                i.id_receptor, 
+                i.id_emisor, 
+                i.estado, 
+                e.nombre AS nombre_equipo, 
+                u.nombre as nombre_persona
             FROM invitaciones i
             JOIN equipos e ON i.id_equipo = e.id
-            JOIN usuarios u ON (u.id = i.id_emisor AND i.id_receptor = %s) 
-                            OR (u.id = i.id_receptor AND i.id_emisor = %s)
-            WHERE i.id_receptor = %s OR i.id_emisor = %s
-            ORDER BY i.id DESC
+            JOIN usuarios u ON (CASE WHEN i.id_receptor = %s THEN i.id_emisor ELSE i.id_receptor END) = u.id
+            WHERE (i.id_receptor = %s OR i.id_emisor = %s) AND i.estado = 'PENDIENTE'
         """
-        cursor.execute(sql, (id_usuario, id_usuario, id_usuario, id_usuario))
-        return cursor.fetchall()
+        cur.execute(sql, (id_usuario, id_usuario, id_usuario))
+        
+        # Para que el modal reconozca los nombres de las columnas:
+        columns = [column[0] for column in cur.description]
+        return [dict(zip(columns, row)) for row in cur.fetchall()]
 
     @classmethod
     def responder_invitacion(cls, db, id_invitacion, accion, id_usuario):

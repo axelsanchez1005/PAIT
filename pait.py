@@ -68,7 +68,7 @@ def signout():
     session.clear()
     return redirect(url_for('index'))
 
-# Actualización de datos (cwlular y correo)
+# Actualización de datos (celular y correo)
 @paitApp.route('/actualizar_perfil', methods=['POST'])
 def actualizar_perfil():
     if 'user_id' not in session: return redirect(url_for('index'))
@@ -259,6 +259,7 @@ def api_equipo(id):
         "idea": equipo.idea,
         "miembros": [m.nombre for m in miembros]
     })
+#----------------------------Funcion para hacer solicitudes---------------------------------
 
 @paitApp.route('/solicitar_unirse/<int:id_equipo>', methods=['POST'])
 def solicitar_unirse(id_equipo):
@@ -287,9 +288,77 @@ def solicitar_unirse(id_equipo):
             
     return redirect(url_for('lista_equipos'))
 
+#-------------------------Funcion para cancelar las invitaciones----------------------------------
 
+@paitApp.route('/cancelar_solicitud/<int:id_invitacion>', methods=['POST'])
+def cancelar_solicitud(id_invitacion):
+    if 'user_id' not in session: return redirect(url_for('index'))
+    
+    cur = db.connection.cursor()
+    # Seguridad: Solo permitimos borrar si el usuario en sesión es el emisor
+    cur.execute("DELETE FROM invitaciones WHERE id = %s AND id_emisor = %s", 
+                (id_invitacion, session['user_id']))
+    db.connection.commit()
+    
+    flash("Solicitud cancelada correctamente.", "info")
+    return redirect(url_for('dashboard_alumno'))
 
-# ---- TABLON ----
+#-------------------------Funcion para procesar a las invitaciones----------------------------------
+@paitApp.route('/procesar_invitacion/<int:id_inv>/<string:accion>', methods=['POST'])
+def procesar_invitacion(id_inv, accion):
+    if 'user_id' not in session: return redirect(url_for('index'))
+    
+    cur = db.connection.cursor()
+    
+    # 1. Obtenemos los protagonistas de la invitación
+    cur.execute("SELECT id_equipo, id_receptor, id_emisor, tipo FROM invitaciones WHERE id = %s", [id_inv])
+    invitacion = cur.fetchone()
+    
+    if not invitacion:
+        flash("Invitación no encontrada.", "danger")
+        return redirect(url_for('dashboard_alumno'))
+    
+    id_equipo = invitacion[0]
+    id_receptor = invitacion[1] # El que recibe (Líder en caso de SOLICITAR)
+    id_emisor = invitacion[2]   # El que envía (Alumno en caso de SOLICITAR)
+    tipo = invitacion[3]
+
+    if accion == 'ACEPTAR':
+        # 2. Lógica CORRECTA: 
+        # Si el alumno pidió unirse (SOLICITAR), el que debe entrar al equipo es el EMISOR.
+        # Si el líder invitó al alumno (INVITAR), el que debe entrar es el RECEPTOR.
+        if tipo == 'SOLICITAR':
+            alumno_a_unir = id_emisor
+        else:
+            alumno_a_unir = id_receptor
+        
+        try:
+            # 3. Insertamos al ALUMNO, no al usuario que tiene la sesión abierta
+            cur.execute("INSERT INTO miembros_equipo (id_usuario, id_equipo) VALUES (%s, %s)", 
+                        (alumno_a_unir, id_equipo))
+            
+            # 4. Marcamos como aceptada
+            cur.execute("UPDATE invitaciones SET estado = 'ACEPTADA' WHERE id = %s", [id_inv])
+            
+            # 5. Limpiamos otras solicitudes pendientes que tenga ese alumno
+            cur.execute("UPDATE invitaciones SET estado = 'RECHAZADA' WHERE id_emisor = %s AND estado = 'PENDIENTE'", [alumno_a_unir])
+            
+            db.connection.commit()
+            flash("Solicitud aceptada. El integrante ha sido añadido al equipo.", "success")
+            
+        except Exception as e:
+            db.connection.rollback()
+            # ESTO te dirá el error real en la página (solo para pruebas)
+            flash(f"Error real de la DB: {str(e)}", "danger") 
+            print(f"DEBUG: {e}")
+
+    elif accion == 'RECHAZAR':
+        cur.execute("UPDATE invitaciones SET estado = 'RECHAZADO' WHERE id = %s", [id_inv])
+        db.connection.commit()
+        flash("Solicitud rechazada.", "info")
+
+    return redirect(url_for('dashboard_alumno'))
+#--------------------------------------------TABLON ------------------------------------------------
 @paitApp.route('/tablon/<int:id_equipo>')
 def tablon(id_equipo):
     if 'user_id' not in session: return redirect(url_for('index'))
@@ -605,17 +674,6 @@ def enviar_invitacion(id_receptor):
         flash(mensaje, "danger")
         
     return redirect(url_for('buscar_alumnos'))
-
-@paitApp.route('/procesar_invitacion/<int:id_inv>/<string:accion>', methods=['POST'])
-def procesar_invitacion(id_inv, accion):
-    if 'user_id' not in session: return redirect(url_for('index'))
-    
-    exito, mensaje = ModelEquipo.responder_invitacion(db, id_inv, accion, session['user_id'])
-    flash(mensaje, "success" if exito else "danger")
-    
-    return redirect(url_for('dashboard_alumno')) 
-
-
 
 
 # ----  ADMIN ----
