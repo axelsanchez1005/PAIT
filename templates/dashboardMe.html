@@ -121,11 +121,13 @@
                 {% for anuncio in anuncios_principales %}
                 <div class="flex items-center p-4 rounded-2xl border transition-all anuncio-item hover:bg-gray-50"
                     onclick="abrirDetalle('{{ anuncio[0] }}', this)" data-leido="{{ anuncio[7] }}"
-                    data-bs-toggle="modal" data-bs-target="#modalDetalle{{ anuncio[0] }}" style="cursor: pointer;">
+                    data-bs-toggle="modal" data-bs-target="#modalDetalle{{ anuncio[0] }}"
+                    style="cursor: pointer; position: relative;">
 
                     {% if anuncio[7] == 0 %}
-                    <span class="position-absolute top-2 start-2 p-1 bg-emerald-500 border border-light rounded-circle"
-                        id="dot-{{ anuncio[0] }}"></span>
+                    <span
+                        class="position-absolute top-3 start-3 p-1 bg-emerald-500 border-2 border-white rounded-circle shadow-sm"
+                        id="dot-{{ anuncio[0] }}" style="z-index: 10;"></span>
                     {% endif %}
 
                     <div

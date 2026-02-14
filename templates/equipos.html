@@ -1,69 +1,136 @@
 {% extends 'layout.html' %}
 {% block head_css %}
 <link rel="stylesheet" href="{{ url_for('static',filename='css/dashboardAl.css') }}">
-{% endblock %}
+<style>
+    .card-match {
+        border: 2px solid #4f46e5 !important;
+        background: linear-gradient(to bottom right, #ffffff, #f5f3ff);
+    }
 
-{% block titulo %}Lista de Equipos{% endblock %}
+    .badge-match {
+        background: #4f46e5;
+        color: white;
+        font-size: 0.6rem;
+    }
+
+    .section-title {
+        font-size: 0.75rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        color: #94a3b8;
+        letter-spacing: 0.15em;
+    }
+</style>
+{% endblock %}
 
 {% block contenido %}
 <script src="https://cdn.tailwindcss.com"></script>
 
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-10">
-        <h1 class="text-3xl font-bold text-gray-800">Equipos PAIT</h1>
-        <a href="{{ url_for('dashboard_alumno') }}" class="btn btn-light rounded-pill px-4 shadow-sm">
+<div class="container px-4 py-5">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-black text-gray-800 tracking-tighter text-balance">Explorar Proyectos
+            </h1>
+            <p class="text-gray-400 text-xs md:text-sm font-medium">Buscando perfiles para {{ mi_carrera }}</p>
+        </div>
+        <a href="{{ url_for('dashboard_alumno') }}"
+            class="btn btn-light rounded-pill px-4 shadow-sm font-bold border w-full md:w-auto text-center">
             <i class="fa-solid fa-arrow-left me-2"></i> Volver
         </a>
     </div>
 
-    <div class="row g-4">
-        {% for equipo in equipos %}
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm rounded-[30px] p-4 h-100">
-                <div class="badge bg-blue-100 text-blue-600 rounded-pill mb-3 w-fit px-3 py-1 text-xs font-bold">
-                    ACTIVO
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-3">{{ equipo.nombre }}</h3>
-                <p class="text-gray-500 text-sm mb-4 line-clamp-2">{{ equipo.idea }}</p>
+    {% if recomendados %}
+    <div class="mb-10">
+        <h2 class="section-title mb-5"><i class="fa-solid fa-wand-magic-sparkles me-2 text-indigo-500"></i> Recomendados
+        </h2>
+        <div class="row g-3 md:g-4">
+            {% for equipo in recomendados %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div
+                    class="card border-0 shadow-lg rounded-[30px] p-4 p-md-5 card-match h-100 transition hover:scale-[1.02]">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="badge badge-match rounded-pill px-3 py-2 font-black uppercase">
+                            {{ '¡Match de Carrera!' if equipo.match_type == 'Carrera' else 'Grado Ideal' }}
+                        </span>
+                    </div>
 
-                <button type="button" class="btn btn-primary w-100 rounded-2xl py-2 font-bold" data-bs-toggle="modal"
-                    data-bs-target="#modalEquipo{{ equipo.id }}">
-                    Ver Equipo
-                </button>
+                    <h3 class="text-xl md:text-2xl font-black text-gray-800 mb-2 leading-tight">{{ equipo.nombre }}</h3>
+                    <p class="text-gray-500 text-xs md:text-sm mb-5 line-clamp-3 italic">"{{ equipo.idea }}"</p>
+
+                    <div class="bg-white/60 rounded-2xl p-3 mb-5 border border-indigo-100">
+                        <p class="text-[9px] font-black text-indigo-400 uppercase mb-1">Perfil solicitado:</p>
+                        <p class="text-xs font-bold text-indigo-900 mb-0">
+                            <i class="fa-solid fa-user-plus me-1"></i> {{ equipo.busca_carrera }}
+                        </p>
+                    </div>
+
+                    <button type="button"
+                        class="btn btn-primary w-100 rounded-2xl py-3 font-black bg-indigo-600 border-0 shadow-lg mt-auto"
+                        data-bs-toggle="modal" data-bs-target="#modalEquipo{{ equipo.id }}">
+                        Ver Equipo
+                    </button>
+                </div>
             </div>
+            {% endfor %}
         </div>
+    </div>
+    {% endif %}
 
-        <div class="modal fade" id="modalEquipo{{ equipo.id }}" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content rounded-[30px] border-0">
-                    <div class="modal-header border-0 p-4">
-                        <h5 class="modal-title font-bold text-2xl">{{ equipo.nombre }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-4 pt-0">
-                        <div class="mb-4">
-                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">La Idea</label>
-                            <p class="text-gray-600 mt-1">{{ equipo.idea }}</p>
-                        </div>
-                        <div class="mb-4">
-                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Líder del
-                                Proyecto</label>
-                            <p class="text-gray-800 font-medium">{{ equipo.nombre_lider }}</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 p-4">
-                        <form action="{{ url_for('solicitar_unirse', id_equipo=equipo.id) }}" method="POST"
-                            class="w-100">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-2xl font-bold">
-                                Solicitar Unirse
-                            </button>
-                        </form>
-                    </div>
-                </div>
+    <h2 class="section-title mb-5">Otros Equipos</h2>
+    <div class="row g-3 md:g-4">
+        {% for equipo in otros %}
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-[25px] p-4 h-100 bg-white hover:shadow-md transition">
+                <h3 class="text-lg font-bold text-gray-800 mb-2 truncate">{{ equipo.nombre }}</h3>
+                <p class="text-gray-400 text-xs mb-4 line-clamp-2">"{{ equipo.idea }}"</p>
+                <button type="button"
+                    class="btn btn-outline-secondary w-100 rounded-xl py-2 font-bold border-2 text-xs mt-auto"
+                    data-bs-toggle="modal" data-bs-target="#modalEquipo{{ equipo.id }}">
+                    Detalles
+                </button>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
+{% for equipo in recomendados + otros %}
+<div class="modal fade" id="modalEquipo{{ equipo.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-content rounded-[35px] md:rounded-[40px] border-0 shadow-2xl">
+            <div class="modal-header border-0 p-4 p-md-5 pb-0">
+                <h5 class="modal-title font-black text-2xl md:text-3xl tracking-tighter">{{ equipo.nombre }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 p-md-5">
+                <div class="mb-5 bg-gray-50 p-4 rounded-3xl">
+                    <label
+                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Proyecto</label>
+                    <p class="text-sm md:text-base text-gray-600 font-medium leading-relaxed">{{ equipo.idea }}</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <div class="flex-grow border border-gray-100 p-3 rounded-2xl text-center min-w-[120px]">
+                        <label class="text-[9px] font-black text-gray-400 uppercase block">Líder</label>
+                        <p class="text-xs font-bold text-gray-800">{{ equipo.nombre_lider }}</p>
+                    </div>
+                    <div
+                        class="flex-grow border border-indigo-100 bg-indigo-50/30 p-3 rounded-2xl text-center min-w-[120px]">
+                        <label class="text-[9px] font-black text-indigo-400 uppercase block">Buscan</label>
+                        <p class="text-xs font-bold text-indigo-700">{{ equipo.busca_carrera }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 p-md-5 pt-0">
+                <form action="{{ url_for('solicitar_unirse', id_equipo=equipo.id) }}" method="POST" class="w-100">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit"
+                        class="btn btn-primary w-100 py-3 md:py-4 rounded-2xl font-black bg-indigo-600 border-0 shadow-xl shadow-indigo-100">
+                        Enviar Solicitud
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

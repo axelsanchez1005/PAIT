@@ -3,9 +3,10 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 08-02-2026 a las 03:46:33
+-- Tiempo de generación: 14-02-2026 a las 03:08:37
 -- Versión del servidor: 9.2.0
 -- Versión de PHP: 7.4.9
+--HOLA
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -46,8 +47,7 @@ CREATE TABLE `alumnos` (
 
 INSERT INTO `alumnos` (`codigoAl`, `nombreAl`, `passwordAl`, `carrera`, `grado`, `grupo`, `turno`, `ingreso`, `invitados`, `celularAl`) VALUES
 (222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'polimatute', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05.000000', 0, '3321790000'),
-(222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'polimatute', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10.000000', 0, '3321793455'),
-(222910055, 'PEREZ HERNANDEZ CARLOS TRUJILLO', 'polimatute', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05.000000', 0, '3321793456');
+(4, 'TERRANOVA HERNANDEZ DIEGO KALO', 'polimatute', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10.000000', 0, '3321793455');
 
 -- --------------------------------------------------------
 
@@ -70,13 +70,12 @@ CREATE TABLE `anuncios` (
 
 INSERT INTO `anuncios` (`id`, `id_equipo`, `id_usuario`, `contenido`, `fecha_publicacion`, `fijado`) VALUES
 (1, 1, 2, 'HOLA GUAPOS', '2026-02-07 21:52:42', 0),
-(4, NULL, 3, 'holaaa\r\nputo', '2026-02-07 23:09:22', 0),
-(6, NULL, 3, 'yiyi', '2026-02-08 01:51:20', 1),
 (7, NULL, 3, 'yy', '2026-02-08 01:55:44', 0),
 (12, NULL, 3, 'h', '2026-02-08 02:27:16', 0),
 (13, NULL, 3, 'o\r\n', '2026-02-08 02:27:20', 0),
 (14, NULL, 3, 'l', '2026-02-08 02:27:32', 0),
-(15, NULL, 3, 'a', '2026-02-08 02:27:37', 0);
+(16, 1, 2, 'hola', '2026-02-13 02:16:34', 0),
+(17, 1, 2, 'Hola cómo están\r\n', '2026-02-13 14:17:05', 0);
 
 -- --------------------------------------------------------
 
@@ -90,15 +89,17 @@ CREATE TABLE `equipos` (
   `idea` text NOT NULL,
   `id_lider` int NOT NULL,
   `id_mentor` int DEFAULT NULL,
-  `link_whatsapp` varchar(255) DEFAULT NULL
+  `link_whatsapp` varchar(255) DEFAULT NULL,
+  `busca_carrera` varchar(10) DEFAULT 'Cualquiera',
+  `busca_grado` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Volcado de datos para la tabla `equipos`
 --
 
-INSERT INTO `equipos` (`id`, `nombre`, `idea`, `id_lider`, `id_mentor`, `link_whatsapp`) VALUES
-(1, 'PAIT - Equipo 1', 'Prueba', 1, 2, 'https:/wasa');
+INSERT INTO `equipos` (`id`, `nombre`, `idea`, `id_lider`, `id_mentor`, `link_whatsapp`, `busca_carrera`, `busca_grado`) VALUES
+(1, 'PAIT - Equipo 1', 'Prueba', 1, 2, 'https://whatsapp.com', 'TPEA', 6);
 
 -- --------------------------------------------------------
 
@@ -120,8 +121,10 @@ CREATE TABLE `invitaciones` (
 --
 
 INSERT INTO `invitaciones` (`id`, `id_emisor`, `id_receptor`, `id_equipo`, `tipo`, `estado`) VALUES
-(1, 4, 1, 1, 'SOLICITAR', 'PENDIENTE'),
-(2, 1, 4, 1, 'INVITAR', 'PENDIENTE');
+(1, 4, 1, 1, 'SOLICITAR', 'RECHAZADA'),
+(2, 1, 4, 1, 'INVITAR', 'ACEPTADA'),
+(3, 4, 1, 1, 'SOLICITAR', 'ACEPTADA'),
+(4, 4, 1, 1, 'SOLICITAR', 'ACEPTADA');
 
 -- --------------------------------------------------------
 
@@ -141,13 +144,11 @@ CREATE TABLE `lecturas_anuncios` (
 
 INSERT INTO `lecturas_anuncios` (`id_usuario`, `id_anuncio`, `fecha_lectura`) VALUES
 (1, 1, '2026-02-08 00:20:53'),
-(1, 4, '2026-02-08 00:23:00'),
-(1, 6, '2026-02-08 02:28:16'),
 (1, 14, '2026-02-08 02:28:28'),
-(1, 15, '2026-02-08 02:28:24'),
-(2, 6, '2026-02-08 03:07:28'),
 (2, 14, '2026-02-08 03:07:31'),
-(2, 15, '2026-02-08 03:07:30');
+(2, 16, '2026-02-13 18:36:12'),
+(2, 17, '2026-02-13 18:36:10'),
+(4, 14, '2026-02-13 18:41:20');
 
 -- --------------------------------------------------------
 
@@ -188,7 +189,8 @@ CREATE TABLE `miembros_equipo` (
 
 INSERT INTO `miembros_equipo` (`id_equipo`, `id_usuario`) VALUES
 (1, 1),
-(1, 2);
+(1, 2),
+(1, 4);
 
 -- --------------------------------------------------------
 
@@ -221,8 +223,7 @@ INSERT INTO `usuarios` (`id`, `codigo`, `nombre`, `password`, `rol`, `correo`, `
 (1, 222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'scrypt:32768:8:1$B9ExGPuhbkc4HFHz$b6784a61489a2e22b23b1484d2bf698f9b8f7c38d4a335deb5c1026276ee7f033d97246c35ee5c95603c57f063a1636e58976a086ba27ad528d438eb138347aa', 'U', 'axel.sanchez1005@alumnos.udg.mx', '3321793454', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05', 0, NULL),
 (2, 222910052, 'GONZALES PEÑANIETO JOSE PEPE', 'scrypt:32768:8:1$PeMuo7eQLtxpPiBK$1ecf664cc99552ecace63d7199c7678f601096ebaa8643e3e547f78581e93257e39639e91fd418c473e998753cfee7e7aa25733606d04c71ef23b046b9bf366c', 'M', 'axelgilb2016@gmail.com', '1321780000', NULL, NULL, NULL, NULL, NULL, 0, NULL),
 (3, 222910053, 'PEREZ HERNANDEZ CARLOS TRUJILLO', 'scrypt:32768:8:1$ceRvggj5shwfPfE5$a1980475193318b257ae0c7284a6cafbd7569d31153f2df11f32c7e97f93c05a6eb0abe8a378967cffdfab8d6cb9b55f055757ac657d38fbbc506e1808329bee', 'A', 'correfalso@gmail.com', 'NULL', 'NULL', 0, 'A', 'M', '2026-02-04 15:49:05', 0, 'ADMIN'),
-(4, 222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'scrypt:32768:8:1$sWd7e11XazdZCa0C$648abf88ae78c3e26d1d60edb5f0b867189add4c511e3b5cb3342597cd74e3d14e8802828fd39f2e021b4b48eaa3226e94206002f47721e1a7b57e16a0cf5d6f', 'U', 'correo@gmail.com', '3321793454', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10', 0, 'hoaaa'),
-(5, 222910055, 'PEREZ HERNANDEZ CARLOS TRUJILLO', 'polimatute', 'U', 'carlos.perez1055@alumnos.udg.mx', '3321793455', 'TPIN', 8, 'A', 'M', '2026-02-04 15:49:05', 0, NULL);
+(4, 222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'scrypt:32768:8:1$sWd7e11XazdZCa0C$648abf88ae78c3e26d1d60edb5f0b867189add4c511e3b5cb3342597cd74e3d14e8802828fd39f2e021b4b48eaa3226e94206002f47721e1a7b57e16a0cf5d6f', 'U', 'correo@gmail.com', '3321793454', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10', 0, 'hoaaa');
 
 --
 -- Índices para tablas volcadas
@@ -287,7 +288,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `anuncios`
 --
 ALTER TABLE `anuncios`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `equipos`
@@ -299,7 +300,7 @@ ALTER TABLE `equipos`
 -- AUTO_INCREMENT de la tabla `invitaciones`
 --
 ALTER TABLE `invitaciones`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `mentores`
@@ -311,7 +312,7 @@ ALTER TABLE `mentores`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Restricciones para tablas volcadas

@@ -5,21 +5,25 @@ class ModelEquipo:
     def obtener_todos(cls, db):
         try:
             cursor = db.connection.cursor()
-            # Hacemos JOIN con usuarios para traer los nombres del líder y mentor de una vez
+            # 1. Agregamos las nuevas columnas de filtro al SELECT
             sql = """
                 SELECT e.id, e.nombre, e.idea, e.id_lider, e.id_mentor, 
-                       u_lider.nombre as nombre_lider, u_mentor.nombre as nombre_mentor
+                    u_lider.nombre as nombre_lider, u_mentor.nombre as nombre_mentor,
+                    e.busca_carrera, e.busca_grado
                 FROM equipos e
                 JOIN usuarios u_lider ON e.id_lider = u_lider.id
                 LEFT JOIN usuarios u_mentor ON e.id_mentor = u_mentor.id
             """
             cursor.execute(sql)
             rows = cursor.fetchall()
-            
+        
             equipos = []
             for row in rows:
-                # Creamos el objeto entidad para cada fila
-                eq = Equipo(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                # 2. Pasamos row[7] (carrera) y row[8] (grado) al objeto Equipo
+                eq = Equipo(
+                    row[0], row[1], row[2], row[3], row[4], 
+                    row[5], row[6], row[7], row[8]
+                )
                 equipos.append(eq)
             return equipos
         except Exception as ex:
@@ -71,13 +75,19 @@ class ModelEquipo:
     @classmethod
     def obtener_por_id(cls, db, id):
         cursor = db.connection.cursor()
-        # Verifica que el orden coincida con tu __init__ de la clase Equipo
-        sql = "SELECT id, nombre, idea, id_lider, id_mentor, link_whatsapp FROM equipos WHERE id = %s"
+        # Ahora traemos busca_carrera y busca_grado para el Tablón
+        sql = """
+            SELECT e.id, e.nombre, e.idea, e.id_lider, e.id_mentor, e.link_whatsapp, 
+                   e.busca_carrera, e.busca_grado 
+            FROM equipos e 
+            WHERE e.id = %s
+        """
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
         if row:
-            # Si tu constructor es (id, nombre, idea, id_lider, id_mentor, link)
-            return Equipo(row[0], row[1], row[2], row[3], row[4], row[5])
+            # Orden: id, nombre, idea, id_lider, id_mentor, link, busca_c, busca_g
+            return Equipo(row[0], row[1], row[2], row[3], row[4], 
+                          link_whatsapp=row[5], busca_carrera=row[6], busca_grado=row[7])
         return None
 
     @classmethod
@@ -100,9 +110,8 @@ class ModelEquipo:
     def obtener_equipo_usuario(cls, db, id_usuario):
         try:
             cursor = db.connection.cursor()
-            # Buscamos si el usuario aparece en la tabla de miembros de cualquier equipo
             sql = """
-                SELECT e.id, e.nombre, e.idea, e.id_lider
+                SELECT e.id, e.nombre, e.idea, e.id_lider, e.busca_carrera, e.busca_grado
                 FROM equipos e
                 JOIN miembros_equipo me ON e.id = me.id_equipo
                 WHERE me.id_usuario = %s
@@ -110,7 +119,7 @@ class ModelEquipo:
             cursor.execute(sql, [id_usuario])
             row = cursor.fetchone()
             if row:
-                return Equipo(row[0], row[1], row[2], row[3])
+                return Equipo(row[0], row[1], row[2], row[3], busca_carrera=row[4], busca_grado=row[5])
             return None
         except Exception as ex:
             raise Exception(ex)
