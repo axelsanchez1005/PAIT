@@ -135,14 +135,17 @@ def dashboard_alumno():
 
 @paitApp.route('/dashboard_mentor')
 def dashboard_mentor():
-    if 'user_id' not in session or session.get('rol') != 'M':
-        return redirect(url_for('index'))
-    
+    if 'user_id' not in session: return redirect(url_for('index'))
     id_u = session['user_id']
+    
     # 1. Obtener equipos asignados al mentor
-    equipos = ModelEquipo.obtener_equipos_mentor(db, id_u)
-    # 2. Consulta de Anuncios Mejorada (Traemos el nombre del equipo)
+    equipos_mentor = ModelEquipo.obtener_equipos_mentor(db, id_u)
+    tiene_equipos = len(equipos_mentor) > 0
+    ids_equipos = [e.id for e in equipos_mentor]
+
+    # 2. Consulta de Anuncios con estado de lectura
     cur = db.connection.cursor()
+    # Traemos anuncios globales (NULL) o de sus equipos asignados
     sql = """
         SELECT a.id, a.contenido, a.fecha_publicacion, a.fijado, u.nombre, a.id_equipo, u.rol,
                (SELECT COUNT(*) FROM lecturas_anuncios la WHERE la.id_anuncio = a.id AND la.id_usuario = %s) as leido,
@@ -151,15 +154,23 @@ def dashboard_mentor():
         JOIN usuarios u ON a.id_usuario = u.id
         LEFT JOIN equipos e ON a.id_equipo = e.id
         WHERE a.id_equipo IS NULL 
-           OR a.id_equipo IN (SELECT id FROM equipos WHERE id_mentor = %s)
-        ORDER BY a.fijado DESC, a.fecha_publicacion DESC
     """
-    cur.execute(sql, (id_u, id_u))
-    todos_los_anuncios = cur.fetchall()  
-    anuncios_principales = todos_los_anuncios[:3]
+    params = [id_u]
     
+    if ids_equipos:
+        # Filtramos por todos los equipos que supervisa
+        placeholders = ', '.join(['%s'] * len(ids_equipos))
+        sql += f" OR a.id_equipo IN ({placeholders}) "
+        params.extend(ids_equipos)
+        
+    sql += " ORDER BY a.fijado DESC, a.fecha_publicacion DESC"
+    cur.execute(sql, params)
+    
+    todos_los_anuncios = cur.fetchall()
+    anuncios_principales = todos_los_anuncios[:3]
+
     return render_template('dashboardMe.html', 
-                           tiene_equipos=len(equipos) > 0, 
+                           tiene_equipos=tiene_equipos,
                            anuncios_principales=anuncios_principales,
                            todos_los_anuncios=todos_los_anuncios)
 
@@ -231,8 +242,38 @@ def recuperar():
 @paitApp.route('/equipos')
 def lista_equipos():
     if 'user_id' not in session: return redirect(url_for('index'))
-    equipos = ModelEquipo.obtener_todos(db)
-    return render_template('equipos.html', equipos=equipos)
+    id_u = session['user_id']
+    
+    # 1. Obtenemos tus datos (Carrera y Grado)
+    cur = db.connection.cursor()
+    cur.execute("SELECT carrera, grado FROM usuarios WHERE id = %s", [id_u])
+    user_data = cur.fetchone()
+    mi_carrera = user_data[0]
+    mi_grado = user_data[1]
+
+    # 2. Obtenemos todos los equipos
+    todos = ModelEquipo.obtener_todos(db)
+    
+    recomendados = []
+    otros = []
+
+    for eq in todos:
+        # Lógica de Matchmaking:
+        # Prioridad 1: Carrera exacta
+        # Prioridad 2: Carrera "Cualquiera" pero semestre exacto
+        if eq.busca_carrera == mi_carrera:
+            eq.match_type = "Carrera" # Etiqueta para el HTML
+            recomendados.append(eq)
+        elif eq.busca_carrera == 'Cualquiera' and eq.busca_grado == mi_grado:
+            eq.match_type = "Semestre"
+            recomendados.append(eq)
+        else:
+            otros.append(eq)
+
+    return render_template('equipos.html', 
+                           recomendados=recomendados, 
+                           otros=otros,
+                           mi_carrera=mi_carrera)
 
 @paitApp.route('/crear_equipo', methods=['POST'])
 def crear_equipo():
@@ -512,43 +553,50 @@ def actualizar_link(id_equipo):
 
 # --- RUTAS PARA GESTIÓN DE ANUNCIOS ---
 
+# --- RUTAS PROTEGIDAS PARA GESTIÓN DE ANUNCIOS ---
+
 @paitApp.route('/editar_anuncio/<int:id_anuncio>', methods=['POST'])
 def editar_anuncio(id_anuncio):
-    id_usuario = session.get('user_id')
+    id_usuario_sesion = session.get('user_id')
+    rol_sesion = session.get('rol')
     nuevo_contenido = request.form.get('contenido')
     
     cur = db.connection.cursor()
-    # Obtenemos el id_equipo antes de editar para el redirect
+    # Obtenemos el id_equipo y el id_usuario (creador) del anuncio
     cur.execute("SELECT id_equipo, id_usuario FROM anuncios WHERE id = %s", [id_anuncio])
-    anuncio_data = cur.fetchone()
+    anuncio_data = cur.fetchone() # anuncio_data[1] es el ID del creador
     
-    if anuncio_data and (session.get('rol') == 'M' or session.get('rol') == 'A'):
-        cur.execute("UPDATE anuncios SET contenido = %s WHERE id = %s", (nuevo_contenido, id_anuncio))
-        db.connection.commit()
-        flash("Anuncio actualizado correctamente.", "success")
-        return redirect(url_for('tablon', id_equipo=anuncio_data[0]))
+    if anuncio_data:
+        # REGLA: Admin puede todo OR Mentor solo si es dueño
+        if rol_sesion == 'A' or (rol_sesion == 'M' and anuncio_data[1] == id_usuario_sesion):
+            cur.execute("UPDATE anuncios SET contenido = %s WHERE id = %s", (nuevo_contenido, id_anuncio))
+            db.connection.commit()
+            flash("Anuncio actualizado correctamente.", "success")
+            return redirect(url_for('tablon', id_equipo=anuncio_data[0]))
     
     flash("No tienes permiso para editar este anuncio.", "danger")
     return redirect(url_for('dashboard_alumno'))
 
 @paitApp.route('/eliminar_anuncio/<int:id_anuncio>', methods=['POST'])
 def eliminar_anuncio(id_anuncio):
-    if 'user_id' not in session: return redirect(url_for('index'))
+    id_usuario_sesion = session.get('user_id')
+    rol_sesion = session.get('rol')
     
     cur = db.connection.cursor()
-    cur.execute("SELECT id_equipo FROM anuncios WHERE id = %s", [id_anuncio])
+    cur.execute("SELECT id_equipo, id_usuario FROM anuncios WHERE id = %s", [id_anuncio])
     anuncio_data = cur.fetchone()
     
-    if anuncio_data and (session.get('rol') == 'M' or session.get('rol') == 'A'):
-        cur.execute("DELETE FROM anuncios WHERE id = %s", [id_anuncio])
-        db.connection.commit()
-        flash("Anuncio eliminado.", "info")
-        
-        # Si no tiene equipo, vuelve a acciones de admin
-        if anuncio_data[0] is None:
-            return redirect(url_for('acciones_admin'))
-        return redirect(url_for('tablon', id_equipo=anuncio_data[0]))
+    if anuncio_data:
+        if rol_sesion == 'A' or (rol_sesion == 'M' and anuncio_data[1] == id_usuario_sesion):
+            cur.execute("DELETE FROM anuncios WHERE id = %s", [id_anuncio])
+            db.connection.commit()
+            flash("Anuncio eliminado.", "info")
+            
+            if anuncio_data[0] is None:
+                return redirect(url_for('acciones_admin'))
+            return redirect(url_for('tablon', id_equipo=anuncio_data[0]))
     
+    flash("No tienes permiso para eliminar este anuncio.", "danger")
     return redirect(url_for('dashboard_alumno'))
 
 @paitApp.route('/admin/publicar_anuncio_general', methods=['POST'])
@@ -674,6 +722,52 @@ def enviar_invitacion(id_receptor):
         flash(mensaje, "danger")
         
     return redirect(url_for('buscar_alumnos'))
+
+# --- RUTA PARA ABANDONAR EQUIPO ---
+@paitApp.route('/abandonar_equipo/<int:id_equipo>', methods=['POST'])
+def abandonar_equipo(id_equipo):
+    if 'user_id' not in session: return redirect(url_for('index'))
+    
+    id_usuario = session['user_id']
+    cur = db.connection.cursor()
+    
+    # 1. Verificar si es el líder
+    cur.execute("SELECT id_lider FROM equipos WHERE id = %s", [id_equipo])
+    equipo = cur.fetchone()
+    
+    if equipo and equipo[0] == id_usuario:
+        flash("Como Jefe de Equipo, no puedes salir sin antes transferir el mando a otro compañero.", "warning")
+        return redirect(url_for('tablon', id_equipo=id_equipo))
+
+    # 2. Eliminar de miembros_equipo
+    cur.execute("DELETE FROM miembros_equipo WHERE id_equipo = %s AND id_usuario = %s", (id_equipo, id_usuario))
+    db.connection.commit()
+    
+    flash("Has salido del equipo correctamente.", "info")
+    return redirect(url_for('dashboard_alumno'))
+
+# --- RUTA PARA CONFIGURAR RECLUTAMIENTO ---
+@paitApp.route('/configurar_reclutamiento/<int:id_equipo>', methods=['POST'])
+def configurar_reclutamiento(id_equipo):
+    if 'user_id' not in session: return redirect(url_for('index'))
+    
+    # Solo Mentor o Líder pueden configurar
+    carrera = request.form.get('busca_carrera')
+    grado = request.form.get('busca_grado') # Puede ser '' (Cualquiera)
+    
+    # Convertir grado a None si es "Cualquiera"
+    grado_val = int(grado) if grado and grado != '' else None
+    
+    cur = db.connection.cursor()
+    cur.execute("""
+        UPDATE equipos 
+        SET busca_carrera = %s, busca_grado = %s 
+        WHERE id = %s
+    """, (carrera, grado_val, id_equipo))
+    db.connection.commit()
+    
+    flash("Preferencias de reclutamiento actualizadas.", "success")
+    return redirect(url_for('tablon', id_equipo=id_equipo))
 
 
 # ----  ADMIN ----

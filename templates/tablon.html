@@ -103,14 +103,15 @@
         <div class="tab-pane fade show active" id="inicio">
             <div class="row g-5">
                 <div class="col-md-3">
-                    <div class="card border-0 shadow-sm rounded-[35px] p-5 mb-5 bg-white">
+
+                    <div class="card border-0 shadow-sm rounded-[35px] p-5 mb-4 bg-white">
                         <span class="section-label">Canal Oficial</span>
                         {% if equipo.link_whatsapp %}
                         <a href="{{ equipo.link_whatsapp }}" target="_blank"
                             class="btn btn-success w-100 rounded-2xl py-3 font-black mb-3 shadow-lg shadow-emerald-100 bg-emerald-500 border-0 transition hover:scale-105">
                             <i class="fa-brands fa-whatsapp me-2 text-xl"></i> WhatsApp
                         </a>
-                        {% if es_lider or es_mentor %}
+                        {% if es_mentor or es_lider %}
                         <button
                             class="btn btn-link text-[10px] w-100 text-gray-400 font-bold decoration-none uppercase tracking-tighter"
                             data-bs-toggle="modal" data-bs-target="#modalLinkWA">Cambiar Enlace</button>
@@ -125,11 +126,31 @@
                         {% endif %}
                     </div>
 
+                    {% if es_mentor or es_lider %}
+                    <div
+                        class="card border-0 shadow-sm rounded-[35px] p-5 mb-4 bg-white border-top border-4 border-indigo-500">
+                        <span class="section-label">Configuración PAIT</span>
+                        <p class="text-[10px] font-black text-gray-400 uppercase mb-3">Buscamos integrante:</p>
+                        <div class="bg-indigo-50 rounded-2xl p-3 mb-4">
+                            <p class="text-xs font-bold text-indigo-800 mb-1">
+                                <i class="fa-solid fa-microchip me-1"></i> {{ equipo.busca_carrera or 'Cualquiera' }}
+                            </p>
+                            <p class="text-[10px] text-indigo-400 font-bold">
+                                {% if equipo.busca_grado %} {{ equipo.busca_grado }}° Semestre {% else %} Cualquier
+                                semestre {% endif %}
+                            </p>
+                        </div>
+                        <button class="btn btn-outline-indigo w-100 rounded-2xl py-2 font-bold text-xs"
+                            data-bs-toggle="modal" data-bs-target="#modalFiltrosReclutamiento">
+                            Configurar Filtros
+                        </button>
+                    </div>
+                    {% endif %}
+
                     {% if (es_lider or es_mentor) and total_miembros < 5 %} <div
                         class="card border-0 shadow-lg rounded-[35px] p-5 bg-indigo-600 text-white">
                         <h6 class="font-black text-sm mb-3 uppercase tracking-widest">Cupos Libres</h6>
-                        <p class="text-xs font-medium opacity-80 mb-5">El equipo aún no está completo. Puedes invitar a
-                            más compañeros de la carrera.</p>
+                        <p class="text-xs font-medium opacity-80 mb-5">El equipo aún no está completo.</p>
                         <a href="{{ url_for('buscar_alumnos') }}"
                             class="btn btn-white w-100 rounded-2xl font-black text-indigo-600 py-3 border-0 bg-white">Invitar</a>
                 </div>
@@ -165,11 +186,10 @@
                         </div>
                         <h4 class="text-2xl font-black text-gray-800">Actualizaciones</h4>
                     </div>
-
                     <div class="space-y-6">
                         {% for anuncio in anuncios %}
                         <div
-                            class="p-5 rounded-[30px] border border-gray-100 flex gap-5 hover:bg-gray-50 transition group">
+                            class="p-5 rounded-[30px] border border-gray-100 flex gap-5 hover:bg-gray-50 transition group position-relative">
                             <div
                                 class="avatar-circle {{ 'bg-indigo-100 text-indigo-600' if anuncio[5] == 'A' else 'bg-emerald-100 text-emerald-600' }}">
                                 {{ 'A' if anuncio[5] == 'A' else 'M' }}
@@ -179,7 +199,36 @@
                                     <span class="font-black text-gray-800">{{ anuncio[3] }} <small
                                             class="ms-3 text-[9px] font-black uppercase tracking-widest text-gray-400">{{
                                             'Admin' if anuncio[5] == 'A' else 'Mentor' }}</small></span>
-                                    <span class="text-[10px] text-gray-400 font-bold uppercase">{{ anuncio[2] }}</span>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="text-[10px] text-gray-400 font-bold uppercase">{{ anuncio[2]
+                                            }}</span>
+                                        {% if session.get('rol') == 'A' or (session.get('rol') == 'M' and anuncio[4] ==
+                                        session.get('user_id')) %}
+                                        <div class="dropdown">
+                                            <button
+                                                class="btn btn-link text-gray-400 p-0 hover:text-indigo-600 transition"
+                                                data-bs-toggle="dropdown"><i
+                                                    class="fa-solid fa-ellipsis-vertical"></i></button>
+                                            <ul
+                                                class="dropdown-menu dropdown-menu-end shadow-xl border-0 rounded-2xl p-2">
+                                                <li><button class="dropdown-item rounded-xl text-sm font-bold py-2"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalEditarAnuncio{{ anuncio[0] }}"><i
+                                                            class="fa-solid fa-pen-to-square me-2 text-indigo-500"></i>
+                                                        Editar</button></li>
+                                                <li>
+                                                    <hr class="dropdown-divider opacity-50">
+                                                </li>
+                                                <li><button
+                                                        class="dropdown-item rounded-xl text-sm font-bold py-2 text-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalEliminarAnuncio{{ anuncio[0] }}"><i
+                                                            class="fa-solid fa-trash-can me-2"></i> Eliminar</button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <p class="text-gray-600 font-medium text-sm leading-relaxed mb-0">{{ anuncio[1] }}</p>
                             </div>
@@ -198,7 +247,6 @@
 
     <div class="tab-pane fade" id="integrantes">
         <div class="max-w-4xl mx-auto py-5">
-
             <span class="section-label">Asesor Académico</span>
             {% if mentor_obj %}
             <div class="mentor-card p-5 mb-12 d-flex justify-content-between align-items-center shadow-md">
@@ -213,9 +261,8 @@
                     </div>
                 </div>
                 <a href="mailto:{{ mentor_obj.correo }}"
-                    class="btn btn-white rounded-circle shadow-sm text-emerald-600 border-0 w-12 h-12 flex items-center justify-content-center bg-white hover:scale-110 transition">
-                    <i class="fa-solid fa-envelope text-xl"></i>
-                </a>
+                    class="btn btn-white rounded-circle shadow-sm text-emerald-600 border-0 w-12 h-12 flex items-center justify-content-center bg-white hover:scale-110 transition"><i
+                        class="fa-solid fa-envelope text-xl"></i></a>
             </div>
             {% else %}
             <div class="p-10 border-2 border-dashed border-gray-100 rounded-[35px] text-center mb-12">
@@ -227,7 +274,7 @@
             <div class="space-y-4">
                 {% for integrante in integrantes %}
                 <div
-                    class="p-5 bg-white rounded-[35px] border border-gray-100 d-flex justify-content-between align-items-center transition hover:shadow-xl hover:border-indigo-100 group">
+                    class="p-5 bg-white rounded-[35px] border border-gray-100 d-flex justify-content-between align-items-center transition hover:shadow-xl group">
                     <div class="d-flex align-items-center">
                         <div
                             class="avatar-circle {{ 'bg-indigo-600 shadow-xl shadow-indigo-100 text-white' if integrante.id == equipo.id_lider else 'bg-gray-100 text-gray-400' }} text-xl">
@@ -244,24 +291,12 @@
 
                     <div class="d-flex gap-3 px-3">
                         {% if (es_mentor or es_lider) and integrante.id != equipo.id_lider %}
-                        <form action="{{ url_for('asignar_lider', id_equipo=equipo.id, id_usuario=integrante.id) }}"
-                            method="POST">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            {% if es_mentor %}
-                            <button type="submit"
-                                class="btn btn-white shadow-sm rounded-2xl text-amber-500 border-0 w-12 h-12 flex items-center justify-content-center hover:bg-amber-50"
-                                title="Ascender a Jefe" onclick="return confirm('¿Confirmar cambio de liderazgo?')">
-                                <i class="fa-solid fa-crown text-xl"></i>
-                            </button>
-                            {% else %}
-                            <button type="submit"
-                                class="btn btn-white shadow-sm rounded-2xl text-indigo-500 border-0 w-12 h-12 flex items-center justify-content-center hover:bg-indigo-50"
-                                title="Ceder mi cargo"
-                                onclick="return confirm('¿Seguro que quieres ceder la jefatura? Pasarás a ser colaborador.')">
-                                <i class="fa-solid fa-right-left text-xl"></i>
-                            </button>
-                            {% endif %}
-                        </form>
+                        <button type="button"
+                            class="btn btn-white shadow-sm rounded-2xl {{ 'text-amber-500' if es_mentor else 'text-indigo-500' }} border-0 w-12 h-12 flex items-center justify-content-center hover:bg-gray-50"
+                            data-bs-toggle="modal" data-bs-target="#modalCederLider{{ integrante.id }}"
+                            title="{{ 'Nombrar Jefe' if es_mentor else 'Ceder mi cargo' }}">
+                            <i class="fa-solid {{ 'fa-crown' if es_mentor else 'fa-right-left' }} text-xl"></i>
+                        </button>
                         {% endif %}
 
                         {% if es_mentor and integrante.id != session['user_id'] %}
@@ -274,44 +309,17 @@
                     </div>
                 </div>
                 {% endfor %}
-                {% for integrante in integrantes %}
-                <div class="modal fade" id="modalEliminar{{ integrante.id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-sm">
-                        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
-                            <div class="modal-body p-5 text-center">
-                                <div
-                                    class="w-20 h-20 bg-red-50 text-red-500 rounded-[30px] flex items-center justify-content-center mx-auto mb-4 text-3xl">
-                                    <i class="fa-solid fa-user-xmark"></i>
-                                </div>
-                                <h5 class="font-black text-gray-800 mb-2">¿Dar de baja?</h5>
-                                <p class="text-xs text-gray-400 font-bold mb-5 leading-relaxed">
-                                    Estás por eliminar a <span class="text-red-500">{{ integrante.nombre }}</span> de
-                                    este equipo.
-                                    Esta acción es irreversible.
-                                </p>
-
-                                <div class="d-flex gap-2">
-                                    <button type="button"
-                                        class="btn btn-light flex-grow-1 rounded-2xl font-black py-3 shadow-sm"
-                                        data-bs-dismiss="modal">
-                                        Cancelar
-                                    </button>
-                                    <form
-                                        action="{{ url_for('eliminar_miembro', id_equipo=equipo.id, id_usuario=integrante.id) }}"
-                                        method="POST" class="flex-grow-1">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit"
-                                            class="btn btn-danger w-100 rounded-2xl font-black py-3 bg-red-600 border-0 shadow-lg shadow-red-100">
-                                            Confirmar
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
             </div>
+
+            {% if session.get('rol') == 'U' and not es_lider %}
+            <div class="mt-12 text-center">
+                <button
+                    class="btn btn-outline-danger rounded-pill px-5 py-2 font-bold border-2 text-xs uppercase tracking-widest"
+                    data-bs-toggle="modal" data-bs-target="#modalSalirEquipo">
+                    <i class="fa-solid fa-door-open me-2"></i> Abandonar este equipo
+                </button>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -322,13 +330,10 @@
                 <i class="fa-solid fa-folder-tree"></i>
             </div>
             <h5 class="text-2xl font-black text-gray-800 mb-4">Módulo de Actividades</h5>
-            <p class="text-gray-400 font-bold mb-10">Aquí se gestionarán los entregables y reportes técnicos del equipo.
-            </p>
-            {% if es_mentor %}
-            <button
-                class="btn btn-primary rounded-full px-8 py-3 font-black bg-indigo-600 border-0 shadow-2xl shadow-indigo-200 transition hover:scale-105">Definir
-                Nueva Tarea</button>
-            {% endif %}
+            <p class="text-gray-400 font-bold mb-10">Aquí se gestionarán los entregables y reportes técnicos.</p>
+            {% if es_mentor %}<button
+                class="btn btn-primary rounded-full px-8 py-3 font-black bg-indigo-600 border-0 shadow-2xl transition hover:scale-105">Definir
+                Tarea</button>{% endif %}
         </div>
     </div>
 </div>
@@ -339,23 +344,198 @@
         <div class="modal-content rounded-[50px] border-0 shadow-2xl">
             <form action="{{ url_for('actualizar_link', id_equipo=equipo.id) }}" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="modal-body p-8">
-                    <h5 class="font-black text-gray-800 text-2xl mb-2 text-center">Enlace de Comunicación</h5>
-                    <p class="text-xs text-center text-gray-400 font-black uppercase tracking-widest mb-8">Canal oficial
-                        del equipo</p>
+                <div class="modal-body p-8 text-center">
+                    <h5 class="font-black text-gray-800 text-2xl mb-2">Canal Oficial</h5>
                     <input type="url" name="link_whatsapp"
-                        class="form-control rounded-2xl py-4 border-0 bg-gray-50 mb-8 font-bold text-sm text-center"
+                        class="form-control rounded-2xl py-4 border-0 bg-gray-50 mb-8 font-bold text-center"
                         placeholder="https://chat.whatsapp.com/..." value="{{ equipo.link_whatsapp or '' }}" required>
                     <div class="d-flex gap-3">
                         <button type="button" class="btn btn-light flex-grow-1 rounded-2xl font-black py-3"
                             data-bs-dismiss="modal">Cerrar</button>
                         <button type="submit"
-                            class="btn btn-primary flex-grow-1 rounded-2xl font-black py-3 bg-indigo-600 border-0 shadow-xl shadow-indigo-100">Guardar</button>
+                            class="btn btn-primary flex-grow-1 rounded-2xl font-black py-3 bg-indigo-600 border-0">Guardar</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalFiltrosReclutamiento" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-[50px] border-0 shadow-2xl">
+            <form action="{{ url_for('configurar_reclutamiento', id_equipo=equipo.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body p-8">
+                    <h5 class="font-black text-gray-800 text-2xl mb-4 text-center">Perfil Buscado</h5>
+                    <div class="mb-4">
+                        <label class="section-label">Carrera Técnica</label>
+                        <select name="busca_carrera"
+                            class="form-select rounded-2xl py-3 border-0 bg-gray-50 font-bold text-sm">
+                            <option value="Cualquiera" {% if equipo.busca_carrera=='Cualquiera' %}selected{% endif %}>
+                                Cualquier Carrera</option>
+                            {% for c in ['TPIN', 'TPTE', 'TPBI', 'TPMC', 'TPEA', 'BTAD', 'BTGO'] %}
+                            <option value="{{ c }}" {% if equipo.busca_carrera==c %}selected{% endif %}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-5">
+                        <label class="section-label">Semestre</label>
+                        <select name="busca_grado"
+                            class="form-select rounded-2xl py-3 border-0 bg-gray-50 font-bold text-sm">
+                            <option value="" {% if not equipo.busca_grado %}selected{% endif %}>Cualquier Semestre
+                            </option>
+                            {% for i in range(1, 9) %}<option value="{{ i }}" {% if equipo.busca_grado==i %}selected{%
+                                endif %}>{{ i }}° Semestre</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <button type="button" class="btn btn-light flex-grow-1 rounded-2xl font-black py-3"
+                            data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit"
+                            class="btn btn-primary flex-grow-1 rounded-2xl font-black py-3 bg-indigo-600 border-0">Guardar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSalirEquipo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <div class="modal-body p-8 text-center">
+                <div
+                    class="w-20 h-20 bg-orange-50 text-orange-500 rounded-[30px] flex items-center justify-content-center mx-auto mb-4 text-3xl">
+                    <i class="fa-solid fa-person-walking-arrow-right"></i>
+                </div>
+                <h5 class="font-black text-gray-800 mb-2">¿Quieres salir?</h5>
+                <p class="text-xs text-gray-400 font-bold mb-6 uppercase tracking-widest">Dejarás de pertenecer a {{
+                    equipo.nombre }}</p>
+                <form action="{{ url_for('abandonar_equipo', id_equipo=equipo.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit"
+                        class="btn btn-danger w-100 rounded-2xl font-black py-3 bg-red-600 border-0 shadow-lg">Confirmar
+                        Salida</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for anuncio in anuncios %}
+<div class="modal fade" id="modalEditarAnuncio{{ anuncio[0] }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <form action="{{ url_for('editar_anuncio', id_anuncio=anuncio[0]) }}" method="POST"><input type="hidden"
+                    name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body p-8">
+                    <h5 class="font-black text-gray-800 text-2xl mb-4">Editar Comunicado</h5><textarea name="contenido"
+                        class="form-control rounded-2xl py-4 border-0 bg-gray-50 mb-5 font-bold text-sm" rows="4"
+                        required>{{ anuncio[1] }}</textarea>
+                    <div class="d-flex gap-3"><button type="button"
+                            class="btn btn-light flex-grow-1 rounded-2xl font-black py-3"
+                            data-bs-dismiss="modal">Cancelar</button><button type="submit"
+                            class="btn btn-primary flex-grow-1 rounded-2xl font-black py-3 bg-indigo-600 border-0 shadow-lg">Guardar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalEliminarAnuncio{{ anuncio[0] }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <div class="modal-body p-8 text-center">
+                <div
+                    class="w-20 h-20 bg-red-50 text-red-500 rounded-[30px] flex items-center justify-content-center mx-auto mb-4 text-3xl">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <h5 class="font-black text-gray-800 mb-2">¿Eliminar aviso?</h5>
+                <div class="d-flex gap-2"><button type="button"
+                        class="btn btn-light flex-grow-1 rounded-2xl font-black py-3"
+                        data-bs-dismiss="modal">No</button>
+                    <form action="{{ url_for('eliminar_anuncio', id_anuncio=anuncio[0]) }}" method="POST"
+                        class="flex-grow-1"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button
+                            type="submit"
+                            class="btn btn-danger w-100 rounded-2xl font-black py-3 bg-red-600 border-0 shadow-lg">Sí</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for integrante in integrantes %}
+<div class="modal fade" id="modalEliminar{{ integrante.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <div class="modal-body p-5 text-center">
+                <div
+                    class="w-20 h-20 bg-red-50 text-red-500 rounded-[30px] flex items-center justify-content-center mx-auto mb-4 text-3xl">
+                    <i class="fa-solid fa-user-xmark"></i>
+                </div>
+                <h5 class="font-black text-gray-800 mb-2">¿Dar de baja?</h5>
+                <p class="text-xs text-gray-400 font-bold mb-5 leading-relaxed">Eliminarás a <span
+                        class="text-red-500">{{ integrante.nombre }}</span>.</p>
+                <div class="d-flex gap-2"><button type="button"
+                        class="btn btn-light flex-grow-1 rounded-2xl font-black py-3"
+                        data-bs-dismiss="modal">No</button>
+                    <form action="{{ url_for('eliminar_miembro', id_equipo=equipo.id, id_usuario=integrante.id) }}"
+                        method="POST" class="flex-grow-1"><input type="hidden" name="csrf_token"
+                            value="{{ csrf_token() }}"><button type="submit"
+                            class="btn btn-danger w-100 rounded-2xl font-black py-3 bg-red-600 border-0 shadow-lg">Sí</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for integrante in integrantes %}
+<div class="modal fade" id="modalCederLider{{ integrante.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <div class="modal-body p-8 text-center">
+                <div
+                    class="w-20 h-20 {{ 'bg-amber-50 text-amber-500' if es_mentor else 'bg-indigo-50 text-indigo-600' }} rounded-[30px] flex items-center justify-content-center mx-auto mb-4 text-3xl shadow-sm">
+                    <i class="fa-solid {{ 'fa-crown' if es_mentor else 'fa-user-tie' }}"></i>
+                </div>
+
+                <h5 class="font-black text-gray-800 mb-2">
+                    {{ 'Nuevo Jefe' if es_mentor else 'Ceder Jefatura' }}
+                </h5>
+
+                <p class="text-xs text-gray-400 font-bold mb-6 leading-relaxed">
+                    {% if es_mentor %}
+                    ¿Nombrar a <span class="text-amber-600">{{ integrante.nombre }}</span> como el nuevo líder del
+                    equipo?
+                    {% else %}
+                    Al transferir el mando a <span class="text-indigo-600">{{ integrante.nombre }}</span>, tú pasarás a
+                    ser colaborador.
+                    {% endif %}
+                </p>
+
+                <div class="d-flex flex-column gap-2">
+                    <form action="{{ url_for('asignar_lider', id_equipo=equipo.id, id_usuario=integrante.id) }}"
+                        method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                            class="btn w-100 rounded-2xl font-black py-3 border-0 shadow-lg {{ 'btn-warning bg-amber-500 text-white' if es_mentor else 'btn-primary bg-indigo-600 text-white' }}">
+                            Confirmar Cambio
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-light rounded-2xl font-black py-2 text-gray-400"
+                        data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 {% endblock %}
