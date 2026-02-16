@@ -58,6 +58,10 @@
                 <i class="fa-solid fa-right-from-bracket me-3"></i> Salir
             </a>
         </div>
+        <p class="text-muted text-xs">
+            <i class="fa-solid fa-clock me-1"></i>
+            Última conexión: {{ usuario.ingreso.strftime('%d %b, %I:%M %p') if usuario.ingreso else 'Nunca' }}
+        </p>
     </div>
 </div>
 

@@ -29,7 +29,7 @@ db = MySQL(paitApp)
 def index():
     return render_template('registro.html')
 
-# login
+#---------------------------------------login-------------------------------------
 @paitApp.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'GET':
@@ -44,6 +44,18 @@ def login():
 
     user_logged = ModelUser.login(db, codigo, password)
     if user_logged:
+        try:
+            cur = db.connection.cursor()
+            # Suponiendo que tu columna se llama 'ultima_conexion'
+            sql = "UPDATE usuarios SET ingreso = NOW() WHERE id = %s"
+            cur.execute(sql, [user_logged.id])
+            db.connection.commit()
+            cur.close()
+        except Exception as e:
+            print(f"Error al registrar conexión: {e}")
+            # No hacemos redirect aquí para que el usuario pueda entrar 
+            # aunque falle el registro de la fecha
+
         session['user_id'] = user_logged.id # Guardamos el ID real de la DB
         session['codigo'] = user_logged.codigo
         session['rol'] = user_logged.rol
@@ -62,7 +74,7 @@ def login():
     flash("Código o contraseña incorrectos.", "danger")
     return redirect(url_for('index'))
 
-# SingOut
+#-----------------------------------SingOut---------------------------------------
 @paitApp.route('/signout', methods=['GET'])
 def signout():
     session.clear()
@@ -123,6 +135,12 @@ def dashboard_alumno():
     invitaciones = ModelEquipo.obtener_invitaciones_usuario(db, id_u)
     # 3. Consulta de Anuncios
     cur = db.connection.cursor()
+    # Buscamos los datos actualizados del usuario, incluyendo la conexión
+    cur.execute("SELECT id, nombre, correo, celular, presentacion, ingreso FROM usuarios WHERE id = %s", [id_u])
+    # Usamos .fetchone() porque es un solo usuario. 
+    # Para que sea fácil de usar, lo convertiremos en un diccionario.
+    col_names = [desc[0] for desc in cur.description]
+    ingreso = dict(zip(col_names, cur.fetchone()))
     sql = """
         SELECT a.id, a.contenido, a.fecha_publicacion, a.fijado, u.nombre, a.id_equipo, u.rol,
                (SELECT COUNT(*) FROM lecturas_anuncios la WHERE la.id_anuncio = a.id AND la.id_usuario = %s) as leido
@@ -142,6 +160,7 @@ def dashboard_alumno():
     # Tomamos los 3 principales para la tarjeta del dashboard
     anuncios_principales = todos_los_anuncios[:3]
     return render_template('dashboardAl.html', 
+                           usuario=ingreso,
                            equipo_usuario=equipo_usuario, 
                            invitaciones=invitaciones,
                            anuncios_principales=anuncios_principales,
