@@ -245,7 +245,7 @@
         </div>
     </div>
 </div>
-
+<!------------------------------------Modal de Editar Perfil----------------------------------->
 <div class="modal fade" id="modalPerfil" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0">
@@ -253,15 +253,37 @@
                 <h5 class="font-bold">Editar Perfil</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('actualizar_perfil') }}" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <form action="{{ url_for('actualizar_perfil') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="modal-body p-4">
                     <input type="text" name="celular" class="form-control mb-3" placeholder="Celular"
-                        value="{{ session.get('celular', '') }}">
-                    <input type="email" name="correo" class="form-control mb-3" placeholder="Correo"
-                        value="{{ session.get('correo', '') }}">
+                        value="{{ session.get('celular', '') }}"
+                        pattern="\d{10}" title="El número de celular debe tener exactamente 10 dígitos" 
+                        maxlength="10"
+                        required
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    <input type="email" name="correo" class="form-control mb-3" 
+                        placeholder="Correo Institucional"
+                        value="{{ session.get('correo', '') }}"
+                        pattern=".+@alumnos\.udg\.mx" 
+                        title="Debes usar exclusivamente tu correo institucional (@alumnos.udg.mx)"
+                        required>
                     <textarea name="presentacion" class="form-control" rows="3"
-                        placeholder="Cuéntanos un poco sobre ti..."></textarea>
+                        placeholder="Cuéntanos un poco sobre ti..."
+                        maxlength="200"
+                        oninput="actualizarContador()">{{ session.get('presentacion', '') }}</textarea>
+                        <div class="text-end">
+                            <small id="charCount" class="text-muted">0 / 200 caracteres</small>
+                        </div>
+                    <script>
+                        function actualizarContador() {
+                            const text = document.getElementById('presentacion');
+                            const count = document.getElementById('charCount');
+                            count.innerText = `${text.value.length} / 200 caracteres`;
+                            }
+                        // Ejecutar al abrir para que muestre el conteo inicial
+                        actualizarContador();
+                    </script>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 fw-bold">Guardar Cambios</button>

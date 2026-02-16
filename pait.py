@@ -68,16 +68,33 @@ def signout():
     session.clear()
     return redirect(url_for('index'))
 
-# Actualización de datos (celular y correo)
+#-------------------Actualización de datos (celular y correo)---------------------
 @paitApp.route('/actualizar_perfil', methods=['POST'])
 def actualizar_perfil():
     if 'user_id' not in session: return redirect(url_for('index'))
     
     id_user = session['user_id']
-    celular = request.form.get('celular')
-    correo = request.form.get('correo')
+    celular = request.form.get('celular').strip()
+    correo = request.form.get('correo').lower().strip()
     presentacion = request.form.get('presentacion', '')
 
+    # 1. Definimos el dominio obligatorio
+    DOMINIO_ESCUELA = "@alumnos.udg.mx"
+
+    # 2. VALIDACIÓN ESTRICTA
+    if not correo.endswith(DOMINIO_ESCUELA):
+        flash(f"Error: El correo que debes utilizar es el institucional ({DOMINIO_ESCUELA}).", "danger")
+        return redirect(url_for('dashboard_alumno'))
+
+    # VALIDACIÓN DE CELULAR: ¿Son 10 caracteres y son todos números?
+    if not (len(celular) == 10 and celular.isdigit()):
+        flash("Error: El número de celular debe tener exactamente 10 dígitos numéricos.", "danger")
+        return redirect(url_for('dashboard_alumno'))
+    
+    if len(presentacion) > 200:
+        flash("Error: La presentación no puede exceder los 200 caracteres.", "danger")
+        return redirect(url_for('dashboard_alumno'))
+    
     try:
         cur = db.connection.cursor()
         cur.execute("""
@@ -94,10 +111,7 @@ def actualizar_perfil():
         flash(f"Error: {str(e)}", "danger")
         return redirect(url_for('dashboard_alumno'))
 
-
-
-
-# ----  Dashboards ----
+# ---- ------------------------------Dashboards --------------------------------
 @paitApp.route('/dashboard_alumno')
 def dashboard_alumno():
     if 'user_id' not in session: return redirect(url_for('index'))
