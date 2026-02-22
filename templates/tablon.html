@@ -61,41 +61,45 @@
 
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-5">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4 mb-5 p-3 bg-white rounded-4 shadow-sm">
+    
+    <div class="order-2 order-md-1">
         <a href="{{ url_for('dashboard_mentor' if session.get('rol') == 'M' else 'dashboard_alumno') }}"
-            class="btn btn-outline-secondary rounded-pill px-5 font-black border-2 hover:bg-gray-50 transition">
+            class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold border-2 hover:bg-light transition-all d-flex align-items-center">
             <i class="fa-solid fa-arrow-left-long me-2"></i> Salir al Panel
         </a>
-
-        <div class="status-container">
-            <h6 class="text-muted">Estatus del Proyecto:</h6>
-            
-            {# Verificamos si la variable existe y no es nula #}
-            {% if equipo and equipo.estado %}
-                {% set badge_color = {
-                    'ACTIVO': 'bg-success',
-                    'RECHAZADO': 'bg-danger',
-                    'CONVOCADO': 'bg-warning text-dark',
-                    'CONCLUIDO': 'bg-primary'
-                }.get(equipo.estado, 'bg-secondary') %}
-                
-                <span class="badge {{ badge_color }} p-2">
-                    {{ equipo.estado }}
-                </span>
-            {% else %}
-                <span class="badge bg-light text-muted p-2">
-                    Estado no disponible
-                </span>
-            {% endif %}
-        </div>
-        
-        <div class="flex items-center gap-3">
-            <span
-                class="badge {{ 'bg-emerald-100 text-emerald-700' if session.get('rol') == 'M' else 'bg-indigo-100 text-indigo-700' }} rounded-full px-4 py-2 font-black text-[10px] uppercase tracking-widest shadow-sm">
-                {{ 'Modo Mentor' if session.get('rol') == 'M' else 'Modo Alumno' }}
-            </span>
-        </div>
     </div>
+
+    <div class="status-container text-center order-1 order-md-2">
+        <h6 class="text-muted mb-1 small text-uppercase fw-bold" style="letter-spacing: 1px;">Estatus del Proyecto</h6>
+        
+        {% if equipo and equipo['estado'] %}
+            {% set badge_color = {
+                'ACTIVO': 'bg-success',
+                'RECHAZADO': 'bg-danger',
+                'CONVOCADO': 'bg-warning text-dark',
+                'CONCLUIDO': 'bg-primary'
+            }.get(equipo['estado'], 'bg-secondary') %}
+            
+            <span class="badge {{ badge_color }} px-4 py-2 rounded-pill shadow-sm">
+                <i class="fa-solid fa-circle me-1" style="font-size: 8px;"></i>
+                {{ equipo['estado'] }}
+            </span>
+        {% else %}
+            <span class="badge bg-light text-muted px-4 py-2 border">
+                Estado no disponible
+            </span>
+        {% endif %}
+    </div>
+    
+    <div class="order-3">
+        <span class="badge {{ 'bg-emerald-100 text-emerald-700' if session.get('rol') == 'M' else 'bg-indigo-100 text-indigo-700' }} rounded-pill px-4 py-2 fw-bold shadow-sm" 
+              style="font-size: 11px; letter-spacing: 1.5px; border: 1px solid currentColor;">
+            <i class="fa-solid {{ 'fa-user-tie' if session.get('rol') == 'M' else 'fa-user-graduate' }} me-2"></i>
+            {{ 'MODO MENTOR' if session.get('rol') == 'M' else 'MODO ALUMNO' }}
+        </span>
+    </div>
+</div>
 
     <div class="banner-equipo mb-12 position-relative overflow-hidden">
         <div class="position-relative z-10">

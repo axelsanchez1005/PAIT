@@ -223,9 +223,23 @@ INSERT INTO `usuarios` (`id`, `codigo`, `nombre`, `password`, `rol`, `correo`, `
 (1, 222910051, 'SANCHEZ HERNANDEZ AXEL GILBERTO', 'scrypt:32768:8:1$B9ExGPuhbkc4HFHz$b6784a61489a2e22b23b1484d2bf698f9b8f7c38d4a335deb5c1026276ee7f033d97246c35ee5c95603c57f063a1636e58976a086ba27ad528d438eb138347aa', 'U', 'axel.sanchez1005@alumnos.udg.mx', '3321793454', 'TPIN', 8, 'A', 'M', '2026-02-21 22:05:12', 0, NULL),
 (2, 222910052, 'GONZALES PEÑANIETO JOSE PEPE', 'scrypt:32768:8:1$PeMuo7eQLtxpPiBK$1ecf664cc99552ecace63d7199c7678f601096ebaa8643e3e547f78581e93257e39639e91fd418c473e998753cfee7e7aa25733606d04c71ef23b046b9bf366c', 'M', 'axelgilb2016@gmail.com', '1321780000', NULL, NULL, NULL, NULL, NULL, 0, NULL),
 (3, 222910053, 'PEREZ HERNANDEZ CARLOS TRUJILLO', 'scrypt:32768:8:1$ceRvggj5shwfPfE5$a1980475193318b257ae0c7284a6cafbd7569d31153f2df11f32c7e97f93c05a6eb0abe8a378967cffdfab8d6cb9b55f055757ac657d38fbbc506e1808329bee', 'A', 'correfalso@gmail.com', 'NULL', 'NULL', 0, 'A', 'M', '2026-02-21 22:30:23', 0, 'ADMIN'),
-(4, 222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'scrypt:32768:8:1$sWd7e11XazdZCa0C$648abf88ae78c3e26d1d60edb5f0b867189add4c511e3b5cb3342597cd74e3d14e8802828fd39f2e021b4b48eaa3226e94206002f47721e1a7b57e16a0cf5d6f', 'U', 'correo@gmail.com', '3321793454', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10', 0, 'hoaaa');
+(4, 222910054, 'TERRANOVA HERNANDEZ DIEGO KALO', 'scrypt:32768:8:1$sWd7e11XazdZCa0C$648abf88ae78c3e26d1d60edb5f0b867189add4c511e3b5cb3342597cd74e3d14e8802828fd39f2e021b4b48eaa3226e94206002f47721e1a7b57e16a0cf5d6f', 'U', 'correo@gmail.com', '3321793454', 'TPBI', 5, 'A', 'M', '2026-02-07 21:23:10', 0, 'hoaaa'),
+(5, 222910055, 'LOPEZ HERNANDEZ MARIA FERNANDA', 'polimatute', 'U', 'correoQgmail.com', '3321793454', 'TPEA', 6, 'A', 'M', '2026-02-07 21:23:10', 0, 'hoaaa');
 
 --
+-- ----------------------------Estructura para la tambla configuracion de hora--------------------------------------------------
+CREATE TABLE configuracion (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    clave VARCHAR(50) UNIQUE,
+    valor_fecha_inicio DATETIME,
+    valor_fecha_fin DATETIME
+);
+
+-- Insertamos el registro inicial para el periodo de equipos
+INSERT INTO configuracion (clave, valor_fecha_inicio, valor_fecha_fin) 
+VALUES ('periodo_registro_equipos', '2023-01-01 00:00:00', '2023-12-31 23:59:59');
+
+
 -- Índices para tablas volcadas
 --
 
@@ -312,7 +326,7 @@ ALTER TABLE `mentores`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restricciones para tablas volcadas

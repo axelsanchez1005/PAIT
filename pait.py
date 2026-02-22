@@ -8,8 +8,22 @@ from itsdangerous import URLSafeTimedSerializer
 # Modelos
 from models.ModelUser import ModelUser
 from models.ModelEquipo import ModelEquipo
+from datetime import datetime
 
 
+#-----------FUNCION PARA VER SI EL PERIODO DE REGISTRO DE EQUIPOS ESTA ACTIVO----------------------
+def esta_periodo_activo():
+    cur = db.connection.cursor()
+    cur.execute("SELECT valor_fecha_inicio, valor_fecha_fin FROM configuracion WHERE clave = 'periodo_registro_equipos'")
+    periodo = cur.fetchone()
+    
+    if periodo:
+        ahora = datetime.now()
+        inicio, fin = periodo[0], periodo[1]
+        return inicio <= ahora <= fin
+    return False
+
+#-----------------Configuracin de la ruta para el Email------------------------
 paitApp = Flask(__name__)
 # Configuración Flask,para decirle quien es el proveedor de correos
 paitApp.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -149,7 +163,7 @@ def dashboard_alumno():
         WHERE a.id_equipo IS NULL 
     """
     params = [id_u]
-    
+    activo = esta_periodo_activo()
     if id_equipo:
         sql += " OR a.id_equipo = %s "
         params.append(id_equipo)
@@ -164,8 +178,9 @@ def dashboard_alumno():
                            equipo_usuario=equipo_usuario, 
                            invitaciones=invitaciones,
                            anuncios_principales=anuncios_principales,
-                           todos_los_anuncios=todos_los_anuncios)
-
+                           todos_los_anuncios=todos_los_anuncios,
+                           registro_abierto=activo)
+#------------------------------Dashboard Mentor-------------------------------- 
 @paitApp.route('/dashboard_mentor')
 def dashboard_mentor():
     if 'user_id' not in session: return redirect(url_for('index'))
@@ -206,7 +221,7 @@ def dashboard_mentor():
                            tiene_equipos=tiene_equipos,
                            anuncios_principales=anuncios_principales,
                            todos_los_anuncios=todos_los_anuncios)
-
+#------------------------------Dashboard Admin-----------------------------------
 @paitApp.route('/dashboard_admin')
 def dashboard_admin():
     if 'user_id' not in session or session.get('rol') != 'A':
@@ -240,7 +255,7 @@ def enviar_recuperacion():
     except Exception as e:
         return f"Error al enviar: {str(e)}"
 
-# Ruta para restablecer la contraseña
+#------------------------Ruta para restablecer la contraseña----------------------
 @paitApp.route('/restablecer/<token>', methods=['GET', 'POST'])
 def restablecerClave(token):
     try:
@@ -265,13 +280,31 @@ def restablecerClave(token):
             
     return render_template('reestablecer.html', token=token)
 
-# Ruta para abrir el formulario de recuperación de contraseña
+#---------------Ruta para abrir el formulario de recuperación de contraseña----------------------
 @paitApp.route('/Recuperar')
 def recuperar():
     return render_template('recuperar.html')
 
+#-------------------configurar periodo de registro de equipos--------------------
+@paitApp.route('/admin/configurar_periodo', methods=['POST'])
+def configurar_periodo():
+    if session.get('rol') != 'A': return redirect(url_for('index'))
+    
+    fecha_inicio = request.form.get('fecha_inicio')
+    fecha_fin = request.form.get('fecha_fin')
+    
+    cur = db.connection.cursor()
+    cur.execute("""
+        UPDATE configuracion 
+        SET valor_fecha_inicio = %s, valor_fecha_fin = %s 
+        WHERE clave = 'periodo_registro_equipos'
+    """, (fecha_inicio, fecha_fin))
+    db.connection.commit()
+    
+    flash("Periodo de registro actualizado", "admin_success")
+    return redirect(url_for('acciones_admin'))
 
-
+#--------------------------Rutas para gestión de equipos--------------------------------
 @paitApp.route('/equipos')
 def lista_equipos():
     if 'user_id' not in session: return redirect(url_for('index'))
@@ -307,10 +340,13 @@ def lista_equipos():
                            recomendados=recomendados, 
                            otros=otros,
                            mi_carrera=mi_carrera)
-
+#-------------------------Funcion para crear equipos----------------------------------
 @paitApp.route('/crear_equipo', methods=['POST'])
 def crear_equipo():
     if 'user_id' not in session: return redirect(url_for('index'))
+    if not esta_periodo_activo():
+        flash("El periodo de registro de equipos ha finalizado o aún no comienza.", "danger")
+        return redirect(url_for('dashboard_alumno'))
     id_lider = session['user_id']
     idea = request.form.get('idea')
     # El modelo maneja el nombre "PAIT - Equipo X" automáticamente
@@ -861,10 +897,17 @@ def acciones_admin():
         WHERE id_equipo IS NULL 
         ORDER BY fijado DESC, fecha_publicacion DESC
     """)
+    cur.execute("SELECT valor_fecha_inicio, valor_fecha_fin FROM configuracion WHERE clave = 'periodo_registro_equipos'")
+    periodo = cur.fetchone()
     anuncios = cur.fetchall()
+    # Convertimos las fechas a formato string compatible con el input de HTML (YYYY-MM-DDTHH:MM)
+    fecha_inicio_str = periodo[0].strftime('%Y-%m-%dT%H:%M') if periodo and periodo[0] else ""
+    fecha_fin_str = periodo[1].strftime('%Y-%m-%dT%H:%M') if periodo and periodo[1] else ""
     
     # Pasamos los anuncios al template
-    return render_template('acciones.html', anuncios=anuncios)
+    return render_template('acciones.html', anuncios=anuncios,
+                           fecha_inicio=fecha_inicio_str, 
+                           fecha_fin=fecha_fin_str)
 
 
 # parte de administrar mentores mediante el admin

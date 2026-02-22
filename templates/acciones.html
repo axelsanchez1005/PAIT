@@ -126,8 +126,8 @@
                     class="card border-0 shadow-sm rounded-[40px] p-5 h-100 transition hover:shadow-xl hover:scale-[1.02] bg-white">
                     <div class="d-flex align-items-center">
                         <div
-                            class="bg-emerald-100 text-emerald-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
-                            <i class="fa-solid fa-user-tie"></i>
+                            class="bg-orange-100 text-orange-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
+                            <i class="fa-solid fa-bars-progress"></i>
                         </div>
                         <div>
                             <h4 class="font-black text-gray-800 text-2xl mb-1">Estado de equipo</h4>
@@ -137,9 +137,24 @@
                 </div>
             </a>
         </div>
+        <div class="col-md-6">
+           <div class="card border-0 shadow-sm rounded-[40px] p-5 h-100 transition hover:shadow-xl hover:scale-[1.02] bg-white"
+                data-bs-toggle="modal" data-bs-target="#modalPeriodoFechas" style="cursor: pointer;">
+                <div class="d-flex align-items-center">
+                    <div
+                        class="bg-blue-100 text-blue-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
+                        <i class="fa-regular fa-calendar-days"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-gray-800 text-2xl mb-1">Fechas de Registro</h4>
+                        <p class="text-sm text-gray-400 font-medium">Configurar fechas de registro de equipos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
+<!-- Modal para gestionar anuncios generales -->
 <div class="modal fade" id="modalAnuncioGeneral" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content rounded-[50px] border-0 shadow-2xl">
@@ -204,7 +219,35 @@
         </div>
     </div>
 </div>
+<!-- Modale para gestionar fecha de equipo -->
+ <div class="modal fade" id="modalPeriodoFechas" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-[50px] border-0 shadow-2xl">
+            <div class="modal-header border-0 p-5 pb-0">
+                <h5 class="text-3xl font-black text-gray-800">Modifica la fecha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-5">
 
+                <form action="{{ url_for('configurar_periodo') }}" method="POST" class="row g-3">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="col-md-5">
+                        <label>Fecha de Inicio:</label>
+                        <input type="datetime-local" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label>Fecha de Cierre:</label>
+                        <input type="datetime-local" name="fecha_fin" class="form-control" value="{{ fecha_fin }}" required>
+
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-dark w-100">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% for anuncio in anuncios %}
 <div class="modal fade" id="modalEliminar{{ anuncio[0] }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
