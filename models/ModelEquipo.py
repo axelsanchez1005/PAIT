@@ -78,7 +78,7 @@ class ModelEquipo:
         # Ahora traemos busca_carrera y busca_grado para el Tablón
         sql = """
             SELECT e.id, e.nombre, e.idea, e.id_lider, e.id_mentor, e.link_whatsapp, 
-                   e.busca_carrera, e.busca_grado 
+                   e.busca_carrera, e.busca_grado, e.estado
             FROM equipos e 
             WHERE e.id = %s
         """
@@ -87,7 +87,7 @@ class ModelEquipo:
         if row:
             # Orden: id, nombre, idea, id_lider, id_mentor, link, busca_c, busca_g
             return Equipo(row[0], row[1], row[2], row[3], row[4], 
-                          link_whatsapp=row[5], busca_carrera=row[6], busca_grado=row[7])
+                          link_whatsapp=row[5], busca_carrera=row[6], busca_grado=row[7], estado=row[8])
         return None
 
     @classmethod

@@ -91,7 +91,8 @@ CREATE TABLE `equipos` (
   `id_mentor` int DEFAULT NULL,
   `link_whatsapp` varchar(255) DEFAULT NULL,
   `busca_carrera` varchar(10) DEFAULT 'Cualquiera',
-  `busca_grado` int DEFAULT NULL
+  `busca_grado` int DEFAULT NULL,
+  `estado` enum('ACTIVO','RECHAZADO','CONVOCADO','CONCLUIDO') DEFAULT 'ACTIVO'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -244,7 +245,6 @@ ALTER TABLE `equipos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_lider` (`id_lider`),
   ADD KEY `id_mentor` (`id_mentor`);
-
 --
 -- Indices de la tabla `invitaciones`
 --

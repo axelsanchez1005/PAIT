@@ -543,7 +543,7 @@ def asignar_lider(id_equipo, id_usuario):
 
     return redirect(url_for('tablon', id_equipo=id_equipo))
 
-#FUNCIONES PARA LINK DE WASAP Y ANUNCIOS
+#------------------------FUNCIONES PARA LINK DE WASAP Y ANUNCIOS---------------------
 @paitApp.route('/publicar_anuncio/<int:id_equipo>', methods=['POST'])
 def publicar_anuncio(id_equipo):
     # Seguridad: Solo Mentores pueden publicar
@@ -582,10 +582,7 @@ def actualizar_link(id_equipo):
 
     return redirect(url_for('tablon', id_equipo=id_equipo))
 
-
-
-# --- RUTAS PARA GESTIÓN DE ANUNCIOS ---
-
+# --------------------RUTAS PARA GESTIÓN DE ANUNCIOS ----------------------------
 # --- RUTAS PROTEGIDAS PARA GESTIÓN DE ANUNCIOS ---
 
 @paitApp.route('/editar_anuncio/<int:id_anuncio>', methods=['POST'])
@@ -670,7 +667,53 @@ def fijar_anuncio(id_anuncio):
     db.connection.commit()
     flash("Prioridad de anuncio actualizada.", "success")
     return redirect(url_for('acciones_admin'))
+#-------------------------RUTA PARA ACTUALIZAR ESTADO ----------------------------
+@paitApp.route('/actualizar_estado_equipo/<int:id_equipo>', methods=['POST'])
+def actualizar_estado_equipo(id_equipo):
+    if session.get('rol') != 'A': # Solo administradores
+        flash("No tienes permiso para esta acción", "danger")
+        return redirect(url_for('index'))
+    
+    nuevo_estado = request.form.get('estado')
+    
+    try:
+        cur = db.connection.cursor()
+        cur.execute("UPDATE equipos SET estado = %s WHERE id = %s", (nuevo_estado, id_equipo))
+        db.connection.commit()
+        flash(f"Estado del equipo actualizado a {nuevo_estado}", "success")
+    except Exception as e:
+        db.connection.rollback()
+        flash("Error al actualizar el estado", "danger")
+        print(e)
+        
+    return redirect(url_for('ver_equipo', id=id_equipo)) # Ajusta a tu ruta de detalle
 
+#---------------------------------Ruta para filtrar pior estado-----------------
+@paitApp.route('/filtro_estado')
+def filtro_estado():
+    if session.get('rol') != 'A': return redirect(url_for('index'))
+    
+    # Capturamos el estado que el admin seleccionó
+    estado_filtro = request.args.get('estado_filtro', '')
+
+    cur = db.connection.cursor()
+    
+    # Construimos la consulta dinámica
+    if estado_filtro and estado_filtro != "TODOS":
+        sql = "SELECT id, nombre, idea, estado FROM equipos WHERE estado = %s"
+        cur.execute(sql, [estado_filtro])
+    else:
+        sql = "SELECT id, nombre, idea, estado FROM equipos"
+        cur.execute(sql)
+    
+    equipos_data = cur.fetchall()
+    
+    # Convertir a lista de diccionarios para facilitar el manejo en el HTML
+    columnas = [desc[0] for desc in cur.description]
+    equipos = [dict(zip(columnas, fila)) for fila in equipos_data]
+
+    return render_template('EstadoEquipo.html', equipos=equipos, estado_actual=estado_filtro)
+#-------------------------RUTA PARA MARCAR ANUNCIO COMO LEÍDO ----------------------------
 @paitApp.route('/marcar_leido/<int:id_anuncio>', methods=['POST'])
 def marcar_leido(id_anuncio):
     if 'user_id' not in session: return jsonify({"success": False}), 401
@@ -838,8 +881,23 @@ def vista_mentores():
     cursor.execute("SELECT id, nombre FROM equipos")
     equipos = cursor.fetchall()
     return render_template('mentor.html', mentores=mentores, equipos=equipos)
+#-------------------- Administrar equipos mediante el admin----------------------------
+@paitApp.route('/admin/equipos')
+def vista_equipos():
+    if session.get('rol') != 'A':
+        return redirect(url_for('login'))
 
-# ÚNICA RUTA PARA ASIGNAR
+    # Agregamos DictCursor para que devuelva diccionarios {'id': 1, 'nombre': '...'}
+    import MySQLdb.cursors 
+    cursor = db.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    cursor.execute("SELECT id, nombre, estado FROM equipos")
+    equipos = cursor.fetchall()
+    
+    # Asegúrate de pasar estado_actual para que el filtro no falle
+    return render_template('EstadoEquipo.html', equipos=equipos, estado_actual='TODOS')
+
+#--------------------ÚNICA RUTA PARA ASIGNAR--------------------------------------
 @paitApp.route('/admin/guardar_asignacion', methods=['POST'])
 def guardar_asignacion():
     # Seguridad: Solo admin

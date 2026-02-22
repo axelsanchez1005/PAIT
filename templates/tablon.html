@@ -66,6 +66,29 @@
             class="btn btn-outline-secondary rounded-pill px-5 font-black border-2 hover:bg-gray-50 transition">
             <i class="fa-solid fa-arrow-left-long me-2"></i> Salir al Panel
         </a>
+
+        <div class="status-container">
+            <h6 class="text-muted">Estatus del Proyecto:</h6>
+            
+            {# Verificamos si la variable existe y no es nula #}
+            {% if equipo and equipo.estado %}
+                {% set badge_color = {
+                    'ACTIVO': 'bg-success',
+                    'RECHAZADO': 'bg-danger',
+                    'CONVOCADO': 'bg-warning text-dark',
+                    'CONCLUIDO': 'bg-primary'
+                }.get(equipo.estado, 'bg-secondary') %}
+                
+                <span class="badge {{ badge_color }} p-2">
+                    {{ equipo.estado }}
+                </span>
+            {% else %}
+                <span class="badge bg-light text-muted p-2">
+                    Estado no disponible
+                </span>
+            {% endif %}
+        </div>
+        
         <div class="flex items-center gap-3">
             <span
                 class="badge {{ 'bg-emerald-100 text-emerald-700' if session.get('rol') == 'M' else 'bg-indigo-100 text-indigo-700' }} rounded-full px-4 py-2 font-black text-[10px] uppercase tracking-widest shadow-sm">

@@ -1,0 +1,115 @@
+{% extends 'layout.html' %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboardCardsAd.css') }}">
+<style>
+    .sidebar { background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%); }
+    .icon-admin { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
+</style>
+{% endblock %}
+
+{% block titulo %}Administrar Equipos{% endblock %}
+
+{% block contenido %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="offcanvas-lg offcanvas-start sidebar position-fixed border-0" tabindex="-1" id="sidebarOffcanvas">
+    <div class="d-flex flex-column h-100 p-3">
+        <div class="py-5 text-center">
+            <div class="bg-white/20 rounded-circle w-16 h-16 mx-auto mb-3 flex items-center justify-content-center border-2 border-white/50">
+                <span class="text-white fw-bold text-2xl">A</span>
+            </div>
+            <h4 class="text-white fw-bold">AlliApp <small class="d-block text-xs opacity-75">Panel Admin</small></h4>
+        </div>
+
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li><a href="{{ url_for('dashboard_admin') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-chart-line me-3"></i> Inicio</a></li>
+            <li><a href="{{ url_for('acciones_admin') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-gears me-3"></i> Acciones</a></li>
+            <li><a href="{{ url_for('vista_mentores') }}" class="nav-link text-white"><i
+                        class="fa-solid fa-user-tie me-3"></i> Mentores</a></li>
+            <li><a href="{{ url_for('vista_equipos') }}" class="nav-link text-white active"><i
+                        class="fa-solid fa-users me-3"></i> Equipos</a></li>
+        </ul>
+
+        <div class="p-3">
+            <a href="{{ url_for('signout') }}" class="nav-link text-white opacity-70"><i
+                    class="fa-solid fa-right-from-bracket me-3"></i> Salir</a>
+        </div>
+    </div>
+</div>
+
+<main class="main-content p-4 p-md-5">
+    <header class="mb-10">
+        <span class="text-green-600 font-semibold tracking-widest text-xs uppercase">Administrador de Sistema</span>
+        <h1 class="text-4xl font-bold text-gray-800">Gestión de Equipos</h1>
+    </header>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('filtro_estado') }}" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label class="fw-bold text-secondary">Filtrar por estado:</label>
+                </div>
+                <div class="col-md-4">
+                    <select name="estado_filtro" class="form-select border-primary">
+                        <option value="TODOS" {{ 'selected' if estado_actual == 'TODOS' }}>Todos los equipos</option>
+                        <option value="CONVOCADO" {{ 'selected' if estado_actual == 'CONVOCADO' }}>🟡 Convocado</option>
+                        <option value="ACTIVO" {{ 'selected' if estado_actual == 'ACTIVO' }}>🟢 Activo</option>
+                        <option value="RECHAZADO" {{ 'selected' if estado_actual == 'RECHAZADO' }}>🔴 Rechazado</option>
+                        <option value="CONCLUIDO" {{ 'selected' if estado_actual == 'CONCLUIDO' }}>🔵 Concluido</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary px-4"><i class="fas fa-filter"></i> Filtrar</button>
+                    <a href="{{ url_for('vista_equipos') }}" class="btn btn-light border">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for equipo in equipos %}
+        <div class="col-md-4 mb-4">
+            <div class="card equipo-card h-100 shadow-sm border-0" style="border-radius: 15px;">
+                <div class="card-body text-center p-5">
+                    <div class="equipo-icon-container mb-4 mx-auto bg-light rounded-circle d-flex align-items-center justify-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-users fa-2x text-dark"></i>
+                    </div>
+                    <h5 class="fw-bold text-gray-800 mb-1">{{ equipo['nombre'] }}</h5>
+                    <p class="text-muted small mb-4">ID Equipo: {{ equipo['id'] }}</p>
+                    
+                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalEstado{{ equipo['id'] }}">
+                        Modificar Estado
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalEstado{{ equipo['id'] }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 15px;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5">Modificar estado: {{ equipo['nombre'] }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form action="{{ url_for('actualizar_estado_equipo', id_equipo=equipo['id']) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <label class="form-label small text-muted">Selecciona el nuevo estado:</label>
+                            <select name="estado" class="form-select form-select-lg" onchange="this.form.submit()">
+                                <option value="CONVOCADO" {{ 'selected' if equipo['estado'] == 'CONVOCADO' }}>Convocado</option>
+                                <option value="ACTIVO" {{ 'selected' if equipo['estado'] == 'ACTIVO' }}>Activo</option>
+                                <option value="RECHAZADO" {{ 'selected' if equipo['estado'] == 'RECHAZADO' }}>Rechazado</option>
+                                <option value="CONCLUIDO" {{ 'selected' if equipo['estado'] == 'CONCLUIDO' }}>Concluido</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}
