@@ -686,7 +686,7 @@ def actualizar_estado_equipo(id_equipo):
         flash("Error al actualizar el estado", "danger")
         print(e)
         
-    return redirect(url_for('ver_equipo', id=id_equipo)) # Ajusta a tu ruta de detalle
+    return redirect(url_for('vista_equipos')) # Ajusta a tu ruta de detalle
 
 #---------------------------------Ruta para filtrar pior estado-----------------
 @paitApp.route('/filtro_estado')
