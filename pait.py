@@ -5,6 +5,8 @@ from config import config
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash
 from itsdangerous import URLSafeTimedSerializer
+from flask_socketio import SocketIO, emit, join_room
+import os
 # Modelos
 from models.ModelUser import ModelUser
 from models.ModelEquipo import ModelEquipo
@@ -23,7 +25,7 @@ def esta_periodo_activo():
         return inicio <= ahora <= fin
     return False
 
-#-----------------Configuracin de la ruta para el Email------------------------
+#-----------------Configuracion de la ruta para el Email------------------------
 paitApp = Flask(__name__)
 # Configuración Flask,para decirle quien es el proveedor de correos
 paitApp.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -32,8 +34,13 @@ paitApp.config['MAIL_USE_TLS'] = True
 paitApp.config['MAIL_USERNAME'] = 'proyectospaitoficial@gmail.com' #bspz lvwj cltp uces
 paitApp.config['MAIL_PASSWORD'] = 'yqyoovwtnxbapocf' # Clave especial de Google
 mail = Mail(paitApp) # Inicializamos el motor
+
 # Resto de la configuración de la app
+paitApp.config['UPLOAD_FOLDER'] = 'static/uploads/chat'
 paitApp.config['SECRET_KEY'] = 'Cl4v3Sup3rm3g4S3gur4PAIT2026!'
+# Configuración de Socket.IO con Redis como Backend
+# 'redis://localhost:6379' es la dirección por defecto
+socketio = SocketIO(paitApp, message_queue='redis://localhost:6379', cors_allowed_origins="*")
 generador = URLSafeTimedSerializer(paitApp.config['SECRET_KEY'])
 csrf = CSRFProtect(paitApp) # Protección CSRF Global
 db = MySQL(paitApp)
@@ -42,7 +49,39 @@ db = MySQL(paitApp)
 @paitApp.route('/')
 def index():
     return render_template('registro.html')
+#------------------------------- Funciones para el caht-----------------------------
+@paitApp.route('/chat/<int:id_equipo>')
+def chat(id_equipo):
+    # Aquí puedes validar si el usuario pertenece al equipo
+    return render_template('chat.html', id_equipo=id_equipo)
 
+# Manejo de conexión y unión a salas (Equipos)
+@socketio.on('join')
+def on_join(data):
+    room = str(data['id_equipo'])
+    join_room(room)
+    emit('status', {'msg': f"Usuario conectado al equipo {room}"}, room=room)
+
+# Manejo de mensajes de texto
+@socketio.on('send_message')
+def handle_message(data):
+    room = str(data['id_equipo'])
+    emit('receive_message', {
+        'user': session.get('nombre', 'Anónimo'),
+        'msg': data['msg']
+    }, room=room)
+
+# Manejo de archivos (Envío de metadatos)
+@socketio.on('send_file')
+def handle_file(data):
+    room = str(data['id_equipo'])
+    # En un entorno real, aquí procesarías la subida vía HTTP 
+    # y Socket.IO solo notificaría a los demás que hay un archivo nuevo.
+    emit('receive_file', {
+        'user': session.get('nombre'),
+        'file_url': data['file_url'],
+        'file_name': data['file_name']
+    }, room=room)
 #---------------------------------------login-------------------------------------
 @paitApp.route('/login', methods=['GET','POST'])
 def login():

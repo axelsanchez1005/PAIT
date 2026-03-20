@@ -239,7 +239,32 @@ CREATE TABLE configuracion (
 INSERT INTO configuracion (clave, valor_fecha_inicio, valor_fecha_fin) 
 VALUES ('periodo_registro_equipos', '2023-01-01 00:00:00', '2023-12-31 23:59:59');
 
+-- --------------------------------------Tabla de Actividades Generales------------------------
+CREATE TABLE actividades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    fecha_limite DATETIME,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+-- ----------------------------------Tabla de Entregas por Equipo---------------------------
+ALTER TABLE equipos ADD PRIMARY KEY (id);
+CREATE TABLE entregas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_actividad INT NOT NULL,
+    id_equipo INT NOT NULL,
+    archivo_local_path VARCHAR(255), -- Ruta dentro del Droplet
+    archivo_drive_id VARCHAR(255), -- ID del archivo en Google Drive
+    fecha_entrega TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    calificacion INT DEFAULT NULL,
+    comentario_mentor TEXT,
+    id_mentor_califica INT,
+    FOREIGN KEY (id_actividad) REFERENCES actividades(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_equipo) REFERENCES equipos(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_mentor_califica) REFERENCES usuarios(id),
+    UNIQUE KEY entrega_unica (id_actividad, id_equipo)
+);
 -- Índices para tablas volcadas
 --
 
