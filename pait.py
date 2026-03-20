@@ -888,24 +888,37 @@ def acciones_admin():
     if session.get('rol') != 'A': 
         return redirect(url_for('index'))
     
+    id_u = session['user_id']
     cur = db.connection.cursor()
-    # Traemos los anuncios generales (id_equipo es NULL)
-    # Ordenamos por fijado primero y luego por fecha
+    
+    # 1. Traemos los anuncios generales
     cur.execute("""
         SELECT id, contenido, fecha_publicacion, fijado 
         FROM anuncios 
         WHERE id_equipo IS NULL 
         ORDER BY fijado DESC, fecha_publicacion DESC
     """)
+    anuncios = cur.fetchall() # Recuperamos anuncios antes de la siguiente consulta
+
+    # 2. Traemos la configuración de fechas
     cur.execute("SELECT valor_fecha_inicio, valor_fecha_fin FROM configuracion WHERE clave = 'periodo_registro_equipos'")
     periodo = cur.fetchone()
-    anuncios = cur.fetchall()
-    # Convertimos las fechas a formato string compatible con el input de HTML (YYYY-MM-DDTHH:MM)
+    
     fecha_inicio_str = periodo[0].strftime('%Y-%m-%dT%H:%M') if periodo and periodo[0] else ""
     fecha_fin_str = periodo[1].strftime('%Y-%m-%dT%H:%M') if periodo and periodo[1] else ""
     
-    # Pasamos los anuncios al template
-    return render_template('acciones.html', anuncios=anuncios,
+    # 3. Traemos todas las actividades para el listado del admin
+    cur.execute("SELECT id, titulo, descripcion, fecha_limite FROM actividades ORDER BY fecha_creacion DESC")
+    actividades = cur.fetchall()
+
+    # 4. Traemos todos los equipos (Usando el modelo existente)
+    # Esto servirá para la pestaña de "Supervisión de Equipos"
+    equipos = ModelEquipo.obtener_todos(db)
+    
+    return render_template('acciones.html', 
+                           anuncios=anuncios,
+                           actividades=actividades,
+                           equipos=equipos,
                            fecha_inicio=fecha_inicio_str, 
                            fecha_fin=fecha_fin_str)
 
@@ -961,6 +974,32 @@ def guardar_asignacion():
         flash("Hubo un error al realizar la asignación.", "danger")
         
     return redirect(url_for('vista_mentores'))
+
+#--------------------CREAR ACTIVIDAD--------------------------------------
+@paitApp.route('/admin/crear_actividad', methods=['POST'])
+def crear_actividad():
+    if session.get('rol') != 'A':
+        return redirect(url_for('login'))
+    
+    titulo = request.form.get('titulo')
+    descripcion = request.form.get('descripcion')
+    fecha_limite = request.form.get('fecha_limite')
+
+    try:
+        cur = db.connection.cursor()
+        # El uso de transacciones implícitas en MySQL evita que se dupliquen 
+        # actividades si hay dos clics rápidos o concurrencia pesada.
+        cur.execute("""
+            INSERT INTO actividades (titulo, descripcion, fecha_limite) 
+            VALUES (%s, %s, %s)
+        """, (titulo, descripcion, fecha_limite))
+        db.connection.commit()
+        flash("Actividad publicada correctamente para todos los equipos.", "success")
+    except Exception as e:
+        db.connection.rollback()
+        flash(f"Error al crear actividad: {str(e)}", "danger")
+        
+    return redirect(url_for('acciones_admin'))
 
 
 

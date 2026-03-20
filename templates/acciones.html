@@ -85,70 +85,181 @@
         </a>
     </div>
 
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-[40px] p-5 h-100 transition hover:shadow-xl hover:scale-[1.02] bg-white"
-                data-bs-toggle="modal" data-bs-target="#modalAnuncioGeneral" style="cursor: pointer;">
-                <div class="d-flex align-items-center">
-                    <div
-                        class="bg-indigo-100 text-indigo-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
-                        <i class="fa-solid fa-bullhorn"></i>
+    <ul class="nav nav-pills mb-10 gap-3 justify-content-center" id="adminTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active rounded-pill px-5 font-black shadow-sm" data-bs-toggle="tab"
+                data-bs-target="#tabGeneral">
+                <i class="fa-solid fa-grip me-2"></i> Gestión General
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-5 font-black shadow-sm" data-bs-toggle="tab"
+                data-bs-target="#tabActividades">
+                <i class="fa-solid fa-list-check me-2"></i> Actividades Classroom
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill px-5 font-black shadow-sm" data-bs-toggle="tab"
+                data-bs-target="#tabEquipos">
+                <i class="fa-solid fa-layer-group me-2"></i> Supervisión de Equipos
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabsContent">
+
+        <div class="tab-pane fade show active" id="tabGeneral">
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-sm rounded-[35px] p-4 h-100 transition hover:scale-105 bg-white"
+                        data-bs-toggle="modal" data-bs-target="#modalAnuncioGeneral" style="cursor: pointer;">
+                        <div class="text-center">
+                            <div
+                                class="bg-indigo-100 text-indigo-600 rounded-2xl w-12 h-12 flex items-center justify-center text-2xl mx-auto mb-3">
+                                <i class="fa-solid fa-bullhorn"></i></div>
+                            <h5 class="font-bold text-gray-800 text-sm mb-0">Anuncios</h5>
+                        </div>
                     </div>
-                    <div>
-                        <h4 class="font-black text-gray-800 text-2xl mb-1">Anuncios</h4>
-                        <p class="text-sm text-gray-400 font-medium">Gestionar comunicados globales del sistema.</p>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('vista_mentores') }}" class="text-decoration-none">
+                        <div
+                            class="card border-0 shadow-sm rounded-[35px] p-4 h-100 transition hover:scale-105 bg-white">
+                            <div class="text-center">
+                                <div
+                                    class="bg-emerald-100 text-emerald-600 rounded-2xl w-12 h-12 flex items-center justify-center text-2xl mx-auto mb-3">
+                                    <i class="fa-solid fa-user-tie"></i></div>
+                                <h5 class="font-bold text-gray-800 text-sm mb-0">Asignar Mentor</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('vista_equipos') }}" class="text-decoration-none">
+                        <div
+                            class="card border-0 shadow-sm rounded-[35px] p-4 h-100 transition hover:scale-105 bg-white">
+                            <div class="text-center">
+                                <div
+                                    class="bg-orange-100 text-orange-600 rounded-2xl w-12 h-12 flex items-center justify-center text-2xl mx-auto mb-3">
+                                    <i class="fa-solid fa-bars-progress"></i></div>
+                                <h5 class="font-bold text-gray-800 text-sm mb-0">Estados</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-0 shadow-sm rounded-[35px] p-4 h-100 transition hover:scale-105 bg-white"
+                        data-bs-toggle="modal" data-bs-target="#modalPeriodoFechas" style="cursor: pointer;">
+                        <div class="text-center">
+                            <div
+                                class="bg-blue-100 text-blue-600 rounded-2xl w-12 h-12 flex items-center justify-center text-2xl mx-auto mb-3">
+                                <i class="fa-regular fa-calendar-days"></i></div>
+                            <h5 class="font-bold text-gray-800 text-sm mb-0">Periodo Registro</h5>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <a href="{{ url_for('vista_mentores') }}" class="text-decoration-none">
-                <div
-                    class="card border-0 shadow-sm rounded-[40px] p-5 h-100 transition hover:shadow-xl hover:scale-[1.02] bg-white">
-                    <div class="d-flex align-items-center">
-                        <div
-                            class="bg-emerald-100 text-emerald-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
-                            <i class="fa-solid fa-user-tie"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-black text-gray-800 text-2xl mb-1">Asignar Mentor</h4>
-                            <p class="text-sm text-gray-400 font-medium">Vincular asesores a los equipos PAIT.</p>
+        <div class="tab-pane fade" id="tabActividades">
+            <div class="row g-5">
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-lg rounded-[40px] p-6 bg-white">
+                        <h4 class="font-black text-gray-800 mb-6"><i
+                                class="fa-solid fa-plus-circle me-2 text-indigo-500"></i> Nueva Tarea</h4>
+                        <form action="{{ url_for('crear_actividad') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-4">
+                                <label class="section-label">Título de Actividad</label>
+                                <input type="text" name="titulo"
+                                    class="form-control rounded-2xl border-0 bg-gray-50 py-3 font-bold text-sm"
+                                    placeholder="Ej: Entrega de Prototipo" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="section-label">Instrucciones</label>
+                                <textarea name="descripcion"
+                                    class="form-control rounded-2xl border-0 bg-gray-50 py-3 text-sm" rows="4"
+                                    placeholder="¿Qué deben entregar los equipos?"></textarea>
+                            </div>
+                            <div class="mb-5">
+                                <label class="section-label">Fecha Límite</label>
+                                <input type="datetime-local" name="fecha_limite"
+                                    class="form-control rounded-2xl border-0 bg-gray-50 py-3 font-bold text-sm"
+                                    required>
+                            </div>
+                            <button type="submit"
+                                class="btn btn-primary w-100 rounded-2xl py-3 font-black bg-indigo-600 border-0 shadow-xl shadow-indigo-100">Publicar
+                                Actividad</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm rounded-[40px] p-6 bg-white h-100">
+                        <h4 class="font-black text-gray-800 mb-6">Tareas Publicadas</h4>
+                        <div class="space-y-3">
+                            {% for act in actividades %}
+                            <div
+                                class="p-4 rounded-3xl border border-gray-100 flex items-center gap-4 hover:bg-gray-50 transition">
+                                <div
+                                    class="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-file-lines"></i></div>
+                                <div class="flex-grow">
+                                    <p class="font-bold text-gray-800 text-sm mb-0">{{ act.titulo }}</p>
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase">Cierra: {{ act.fecha_limite
+                                        }}</p>
+                                </div>
+                                <button class="btn btn-light rounded-xl text-xs font-bold">Ver Entregas</button>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-10 opacity-30">
+                                <i class="fa-solid fa-box-open text-4xl mb-2"></i>
+                                <p class="font-bold italic">No hay actividades creadas.</p>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
-            </a>
+            </div>
         </div>
 
-        <div class="col-md-6">
-            <a href="{{ url_for('vista_equipos') }}" class="text-decoration-none">
-                <div
-                    class="card border-0 shadow-sm rounded-[40px] p-5 h-100 transition hover:shadow-xl hover:scale-[1.02] bg-white">
-                    <div class="d-flex align-items-center">
-                        <div
-                            class="bg-orange-100 text-orange-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
-                            <i class="fa-solid fa-bars-progress"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-black text-gray-800 text-2xl mb-1">Estado de equipo</h4>
-                            <p class="text-sm text-gray-400 font-medium">Modificar el avance y progreso del equipo</p>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-6">
-           <div class="card border-0 shadow-sm rounded-[40px] p-5 h-100 transition hover:shadow-xl hover:scale-[1.02] bg-white"
-                data-bs-toggle="modal" data-bs-target="#modalPeriodoFechas" style="cursor: pointer;">
-                <div class="d-flex align-items-center">
-                    <div
-                        class="bg-blue-100 text-blue-600 rounded-[22px] w-16 h-16 flex items-center justify-content-center text-3xl me-5">
-                        <i class="fa-regular fa-calendar-days"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-black text-gray-800 text-2xl mb-1">Fechas de Registro</h4>
-                        <p class="text-sm text-gray-400 font-medium">Configurar fechas de registro de equipos.</p>
-                    </div>
+        <div class="tab-pane fade" id="tabEquipos">
+            <div class="card border-0 shadow-sm rounded-[40px] p-6 bg-white">
+                <h4 class="font-black text-gray-800 mb-6">Listado General de Equipos</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle border-0">
+                        <thead>
+                            <tr class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-0">
+                                <th>Equipo</th>
+                                <th>Líder</th>
+                                <th>Mentor</th>
+                                <th>Miembros</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-0">
+                            {% for eq in equipos %}
+                            <tr class="border-0">
+                                <td><span class="font-bold text-gray-800 text-sm">{{ eq.nombre }}</span></td>
+                                <td><span class="text-xs font-medium text-gray-500">{{ eq.nombre_lider }}</span></td>
+                                <td>
+                                    {% if eq.nombre_mentor %}
+                                    <span
+                                        class="badge bg-emerald-100 text-emerald-700 rounded-pill text-[9px] px-2 py-1 font-black">{{
+                                        eq.nombre_mentor }}</span>
+                                    {% else %}
+                                    <span class="text-[9px] text-gray-300 italic">Sin mentor</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="text-xs font-black text-indigo-600">ID #{{ eq.id }}</span></td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('tablon', id_equipo=eq.id) }}"
+                                        class="btn btn-light btn-sm rounded-pill px-3 font-bold text-[10px]">Ver
+                                        Tablón</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -220,7 +331,7 @@
     </div>
 </div>
 <!-- Modale para gestionar fecha de equipo -->
- <div class="modal fade" id="modalPeriodoFechas" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalPeriodoFechas" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content rounded-[50px] border-0 shadow-2xl">
             <div class="modal-header border-0 p-5 pb-0">
@@ -233,11 +344,13 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="col-md-5">
                         <label>Fecha de Inicio:</label>
-                        <input type="datetime-local" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}" required>
+                        <input type="datetime-local" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}"
+                            required>
                     </div>
                     <div class="col-md-5">
                         <label>Fecha de Cierre:</label>
-                        <input type="datetime-local" name="fecha_fin" class="form-control" value="{{ fecha_fin }}" required>
+                        <input type="datetime-local" name="fecha_fin" class="form-control" value="{{ fecha_fin }}"
+                            required>
 
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
