@@ -249,21 +249,15 @@ CREATE TABLE actividades (
 );
 
 -- ----------------------------------Tabla de Entregas por Equipo---------------------------
-ALTER TABLE equipos ADD PRIMARY KEY (id);
 CREATE TABLE entregas (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_actividad INT NOT NULL,
-    id_equipo INT NOT NULL,
-    archivo_local_path VARCHAR(255), -- Ruta dentro del Droplet
-    archivo_drive_id VARCHAR(255), -- ID del archivo en Google Drive
-    fecha_entrega TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    calificacion INT DEFAULT NULL,
-    comentario_mentor TEXT,
-    id_mentor_califica INT,
-    FOREIGN KEY (id_actividad) REFERENCES actividades(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_equipo) REFERENCES equipos(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_mentor_califica) REFERENCES usuarios(id),
-    UNIQUE KEY entrega_unica (id_actividad, id_equipo)
+    id_actividad INT,
+    id_equipo INT,
+    id_usuario INT, -- Quién lo subió (el líder o mentor)
+    archivo_url VARCHAR(255),
+    fecha_entrega DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_actividad) REFERENCES actividades(id),
+    FOREIGN KEY (id_equipo) REFERENCES equipos(id)
 );
 -- Índices para tablas volcadas
 --

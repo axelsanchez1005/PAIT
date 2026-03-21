@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash
 from itsdangerous import URLSafeTimedSerializer
 from flask_socketio import SocketIO, emit, join_room
 import os
+from werkzeug.utils import secure_filename
 # Modelos
 from models.ModelUser import ModelUser
 from models.ModelEquipo import ModelEquipo
@@ -38,6 +39,14 @@ mail = Mail(paitApp) # Inicializamos el motor
 # Resto de la configuración de la app
 paitApp.config['UPLOAD_FOLDER'] = 'static/uploads/chat'
 paitApp.config['SECRET_KEY'] = 'Cl4v3Sup3rm3g4S3gur4PAIT2026!'
+
+# Configuración de subidas
+UPLOAD_FOLDER = 'static/entregas'
+ALLOWED_EXTENSIONS = {'pdf', 'zip', 'rar', 'docx'}
+
+paitApp.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
 # Configuración de Socket.IO con Redis como Backend
 # 'redis://localhost:6379' es la dirección por defecto
 socketio = SocketIO(paitApp, message_queue='redis://localhost:6379', cors_allowed_origins="*")
@@ -534,6 +543,21 @@ def tablon(id_equipo):
     
     # 5. Obtener anuncios
     cur = db.connection.cursor()
+
+# Esta consulta trae la actividad y un '1' si el equipo ya entregó, o 'NULL' si no.
+    query_actividades = """
+        SELECT 
+            a.id, 
+            a.titulo, 
+            a.descripcion, 
+            a.fecha_limite,
+            (SELECT COUNT(*) FROM entregas e WHERE e.id_actividad = a.id AND e.id_equipo = %s) as entregado
+        FROM actividades a
+        ORDER BY a.fecha_limite ASC
+    """
+    cur.execute(query_actividades, (id_equipo,))
+    actividades_data = cur.fetchall()
+
     cur.execute("""
         SELECT a.id, a.contenido, a.fecha_publicacion, u.nombre, a.id_usuario, u.rol
         FROM anuncios a 
@@ -542,6 +566,16 @@ def tablon(id_equipo):
         ORDER BY a.fecha_publicacion DESC
     """, [id_equipo])
     anuncios = cur.fetchall()
+
+    # 6. NUEVO: Obtener actividades (Trabajos en clase)
+    # Traemos todas las actividades ordenadas por la fecha de entrega más cercana
+    cur.execute("""
+        SELECT id, titulo, descripcion, DATE_FORMAT(fecha_limite, '%d/%m/%Y %H:%i') 
+        FROM actividades 
+        ORDER BY fecha_limite ASC
+    """)
+    actividades = cur.fetchall()
+    
     
     return render_template('tablon.html', 
                            equipo=equipo, 
@@ -550,7 +584,9 @@ def tablon(id_equipo):
                            mentor_obj=mentor_obj,
                            total_miembros=total_miembros,
                            es_mentor=es_mentor,
-                           es_lider=es_lider)
+                           es_lider=es_lider,
+                           actividades=actividades,
+                           actividades_data=actividades_data)
 
 @paitApp.route('/eliminar_miembro/<int:id_equipo>/<int:id_usuario>', methods=['POST'])
 def eliminar_miembro(id_equipo, id_usuario):
@@ -874,7 +910,7 @@ def enviar_invitacion(id_receptor):
         
     return redirect(url_for('buscar_alumnos'))
 
-# --- RUTA PARA ABANDONAR EQUIPO ---
+# ------------------------ RUTA PARA ABANDONAR EQUIPO -----------------------
 @paitApp.route('/abandonar_equipo/<int:id_equipo>', methods=['POST'])
 def abandonar_equipo(id_equipo):
     if 'user_id' not in session: return redirect(url_for('index'))
@@ -897,7 +933,7 @@ def abandonar_equipo(id_equipo):
     flash("Has salido del equipo correctamente.", "info")
     return redirect(url_for('dashboard_alumno'))
 
-# --- RUTA PARA CONFIGURAR RECLUTAMIENTO ---
+# --------------------------------  CONFIGURAR RECLUTAMIENTO ----------------------------------
 @paitApp.route('/configurar_reclutamiento/<int:id_equipo>', methods=['POST'])
 def configurar_reclutamiento(id_equipo):
     if 'user_id' not in session: return redirect(url_for('index'))
@@ -921,7 +957,7 @@ def configurar_reclutamiento(id_equipo):
     return redirect(url_for('tablon', id_equipo=id_equipo))
 
 
-# ----  ADMIN ----
+# --------------------------------  ADMIN acciones----------------------------------
 @paitApp.route('/admin/acciones')
 def acciones_admin():
     if session.get('rol') != 'A': 
@@ -1040,7 +1076,48 @@ def crear_actividad():
         
     return redirect(url_for('acciones_admin'))
 
+#------------------- subir_entrga----------------------------------------------------
+@paitApp.route('/subir_entrega/<int:id_actividad>/<int:id_equipo>', methods=['POST'])
+def subir_entrega(id_actividad, id_equipo):
+    if 'user_id' not in session: return redirect(url_for('index'))
+    
+    id_usuario = session['user_id']
+    
+    # Verificamos si llegó el archivo
+    if 'archivo_tarea' not in request.files:
+        flash("No se seleccionó ningún archivo.", "danger")
+        return redirect(url_for('tablon', id_equipo=id_equipo))
+        
+    file = request.files['archivo_tarea']
+    
+    if file.filename == '':
+        flash("Archivo vacío.", "warning")
+        return redirect(url_for('tablon', id_equipo=id_equipo))
 
+    if file:
+        # Creamos un nombre seguro: equipo_1_tarea_5_archivo.pdf
+        filename = secure_filename(f"eq_{id_equipo}_act_{id_actividad}_{file.filename}")
+        filepath = os.path.join(paitApp.config['UPLOAD_FOLDER'], filename)
+        
+        try:
+            # 1. Guardar físicamente el archivo
+            file.save(filepath)
+            
+            # 2. Registrar en la base de datos
+            cur = db.connection.cursor()
+            cur.execute("""
+                INSERT INTO entregas (id_actividad, id_equipo, id_usuario, archivo_url)
+                VALUES (%s, %s, %s, %s)
+            """, (id_actividad, id_equipo, id_usuario, filename))
+            
+            db.connection.commit()
+            flash("¡Tarea entregada con éxito! Ya puedes descansar un poco.", "success")
+            
+        except Exception as e:
+            db.connection.rollback()
+            flash(f"Error al guardar la entrega: {str(e)}", "danger")
+
+    return redirect(url_for('tablon', id_equipo=id_equipo))
 
 if __name__ == '__main__':
     paitApp.config.from_object(config['development'])

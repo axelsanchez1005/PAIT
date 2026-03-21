@@ -350,20 +350,57 @@
         </div>
     </div>
 
-    <div class="tab-pane fade" id="actividades">
-        <div class="max-w-3xl mx-auto py-20 text-center">
-            <div
-                class="w-32 h-32 bg-gray-50 rounded-[50px] flex items-center justify-content-center mx-auto mb-8 text-gray-200 text-5xl">
-                <i class="fa-solid fa-folder-tree"></i>
+<div class="tab-pane fade" id="actividades">
+    <div class="max-w-4xl mx-auto py-5">
+        <span class="section-label">Plan de Trabajo</span>
+        
+        <div class="space-y-4">
+            {% for act in actividades %}
+            {% set ya_entregado = act[4] > 0 %}
+            
+            <div class="p-5 bg-white rounded-[35px] border {{ 'border-emerald-100 bg-emerald-50/20' if ya_entregado else 'border-gray-100' }} shadow-sm transition hover:shadow-md">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex align-items-center">
+                        <div class="w-12 h-12 {{ 'bg-emerald-100 text-emerald-600' if ya_entregado else 'bg-indigo-50 text-indigo-600' }} rounded-2xl flex items-center justify-content-center text-xl">
+                            <i class="fa-solid {{ 'fa-check-double' if ya_entregado else 'fa-file-signature' }}"></i>
+                        </div>
+                        <div class="ms-4">
+                            <h6 class="mb-0 font-black {{ 'text-emerald-900' if ya_entregado else 'text-gray-800' }} text-lg">{{ act[1] }}</h6>
+                            <span class="text-[10px] font-black uppercase tracking-widest {{ 'text-emerald-500' if ya_entregado else 'text-indigo-400' }}">
+                                {{ 'Tarea Completada' if ya_entregado else 'Pendiente de envío' }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {% if not ya_entregado %}
+                    <span class="badge rounded-pill bg-orange-50 text-orange-600 border border-orange-100 px-3 py-2 font-black text-[10px]">
+                        Límite: {{ act[3] }}
+                    </span>
+                    {% else %}
+                    <span class="text-emerald-500 font-black text-[10px] uppercase tracking-tighter">
+                        <i class="fa-solid fa-cloud-check me-1"></i> Recibido en sistema
+                    </span>
+                    {% endif %}
+                </div>
+
+                <p class="text-gray-500 font-medium text-sm mt-3 mb-4 px-2">{{ act[2] }}</p>
+
+                <div class="d-flex justify-content-end border-top pt-4">
+                    {% if ya_entregado %}
+                        <button class="btn btn-light rounded-2xl px-5 font-black text-emerald-600 border-0 cursor-default" disabled>
+                            <i class="fa-solid fa-circle-check me-2"></i> Entregado
+                        </button>
+                    {% else %}
+                        <button class="btn btn-primary rounded-2xl px-5 font-black bg-indigo-600 border-0 shadow-lg shadow-indigo-100 hover:scale-105 transition-transform"
+                                data-bs-toggle="modal" data-bs-target="#modalEntregar{{ act[0] }}">
+                            <i class="fa-solid fa-cloud-arrow-up me-2"></i> Subir Tarea
+                        </button>
+                    {% endif %}
+                </div>
             </div>
-            <h5 class="text-2xl font-black text-gray-800 mb-4">Módulo de Actividades</h5>
-            <p class="text-gray-400 font-bold mb-10">Aquí se gestionarán los entregables y reportes técnicos.</p>
-            {% if es_mentor %}<button
-                class="btn btn-primary rounded-full px-8 py-3 font-black bg-indigo-600 border-0 shadow-2xl transition hover:scale-105">Definir
-                Tarea</button>{% endif %}
+            {% endfor %}
         </div>
     </div>
-</div>
 </div>
 
 <div class="modal fade" id="modalLinkWA" tabindex="-1">
@@ -560,6 +597,35 @@
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for act in actividades %}
+<div class="modal fade" id="modalEntregar{{ act[0] }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-[40px] border-0 shadow-2xl">
+            <form action="{{ url_for('subir_entrega', id_actividad=act[0], id_equipo=equipo.id) }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body p-8 text-center">
+                    <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[30px] flex items-center justify-content-center mx-auto mb-4 text-3xl">
+                        <i class="fa-solid fa-upload"></i>
+                    </div>
+                    <h5 class="font-black text-gray-800 mb-1">Subir Trabajo</h5>
+                    <p class="text-xs text-gray-400 font-bold mb-6 uppercase tracking-widest">{{ act[1] }}</p>
+                    
+                    <div class="bg-gray-50 rounded-2xl p-4 border-2 border-dashed border-gray-200 mb-6">
+                        <input type="file" name="archivo_tarea" class="form-control border-0 bg-transparent font-bold text-sm" required>
+                        <p class="text-[9px] text-gray-400 mt-2 mb-0 uppercase">Solo archivos PDF o ZIP (Máx 10MB)</p>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button type="button" class="btn btn-light flex-grow-1 rounded-2xl font-black py-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary flex-grow-1 rounded-2xl font-black py-3 bg-indigo-600 border-0 shadow-lg">Enviar</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
