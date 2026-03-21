@@ -1,21 +1,7 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Servidor: localhost
--- Tiempo de generación: 22-02-2026 a las 04:36:41
--- Versión del servidor: 8.0.44
--- Versión de PHP: 7.4.9
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Base de datos: `pait`
@@ -239,26 +225,37 @@ CREATE TABLE configuracion (
 INSERT INTO configuracion (clave, valor_fecha_inicio, valor_fecha_fin) 
 VALUES ('periodo_registro_equipos', '2023-01-01 00:00:00', '2023-12-31 23:59:59');
 
--- --------------------------------------Tabla de Actividades Generales------------------------
-CREATE TABLE actividades (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(150) NOT NULL,
-    descripcion TEXT,
-    fecha_limite DATETIME,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- 1. Primero asegúrate de que la tabla equipos esté bien definida
+-- (Esto asume que la tabla equipos ya existe según tu dump)
 
--- ----------------------------------Tabla de Entregas por Equipo---------------------------
-CREATE TABLE entregas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_actividad INT,
-    id_equipo INT,
-    id_usuario INT, -- Quién lo subió (el líder o mentor)
-    archivo_url VARCHAR(255),
-    fecha_entrega DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_actividad) REFERENCES actividades(id),
-    FOREIGN KEY (id_equipo) REFERENCES equipos(id)
-);
+-- 2. Creamos la tabla de actividades (necesaria para la relación)
+CREATE TABLE IF NOT EXISTS `actividades` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `titulo` varchar(150) NOT NULL,
+    `descripcion` text,
+    `fecha_limite` datetime DEFAULT NULL,
+    `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 3. Creamos la tabla de entregas con los índices correctos desde el inicio
+CREATE TABLE IF NOT EXISTS `entregas` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id_actividad` INT NOT NULL,
+    `id_equipo` INT NOT NULL,
+    `id_usuario` INT NOT NULL,
+    `archivo_url` VARCHAR(255),
+    `fecha_entrega` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX (`id_actividad`),
+    INDEX (`id_equipo`),
+    INDEX (`id_usuario`)
+) ENGINE=InnoDB;
+
+-- 4. Agregamos las restricciones (Foreign Keys) de forma segura
+ALTER TABLE `entregas`
+  ADD CONSTRAINT `fk_entrega_actividad` FOREIGN KEY (`id_actividad`) REFERENCES `actividades` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_entrega_equipo` FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_entrega_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 -- Índices para tablas volcadas
 --
 
@@ -333,7 +330,8 @@ ALTER TABLE `equipos`
 -- AUTO_INCREMENT de la tabla `invitaciones`
 --
 ALTER TABLE `invitaciones`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  ALTER TABLE `equipos` ADD PRIMARY KEY IF NOT EXISTS (`id`);
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `mentores`
@@ -362,6 +360,7 @@ ALTER TABLE `anuncios`
 -- Filtros para la tabla `equipos`
 --
 ALTER TABLE `equipos`
+  ADD PRIMARY KEY ('id'),
   ADD CONSTRAINT `equipos_ibfk_1` FOREIGN KEY (`id_lider`) REFERENCES `usuarios` (`id`),
   ADD CONSTRAINT `equipos_ibfk_2` FOREIGN KEY (`id_mentor`) REFERENCES `usuarios` (`id`);
 
@@ -381,11 +380,43 @@ ALTER TABLE `lecturas_anuncios`
   ADD CONSTRAINT `lecturas_anuncios_ibfk_2` FOREIGN KEY (`id_anuncio`) REFERENCES `anuncios` (`id`) ON DELETE CASCADE;
 
 --
+-- Filtros para la tabla `entregaso`
+--
+ALTER TABLE `entregas`
+  ADD CONSTRAINT `fk_entrega_equipo` 
+  FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id`) 
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `entregas`
+  ADD CONSTRAINT `fk_entrega_actividad` 
+  FOREIGN KEY (`id_actividad`) REFERENCES `actividades` (`id`) 
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Filtros para la tabla `miembros_equipo`
 --
 ALTER TABLE `miembros_equipo`
   ADD CONSTRAINT `miembros_equipo_ibfk_1` FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `miembros_equipo_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+
+CREATE TABLE IF NOT EXISTS `entregas` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id_actividad` INT NOT NULL,
+    `id_equipo` INT NOT NULL,
+    `id_usuario` INT NOT NULL,
+    `archivo_url` VARCHAR(255),
+    `fecha_entrega` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX (`id_actividad`),
+    INDEX (`id_equipo`),
+    INDEX (`id_usuario`)
+) ENGINE=InnoDB;
+
+-- 4. Agregamos las restricciones (Foreign Keys) de forma segura
+ALTER TABLE `entregas`
+  ADD CONSTRAINT `fk_entrega_actividad` FOREIGN KEY (`id_actividad`) REFERENCES `actividades` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_entrega_equipo` FOREIGN KEY (`id_equipo`) REFERENCES `equipos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_entrega_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
